@@ -1,0 +1,6 @@
+coverage.out
+*.pem
+imageRepository/*
+cmd
+.vscode
+.DS_Store
