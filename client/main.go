@@ -65,7 +65,7 @@ func Save(client proto.EmployeeServiceClient) {
 
 // bulk insert employee
 func SaveAll(client proto.EmployeeServiceClient) {
-	newEmployees := []proto.Employee{
+	newEmployees := []*proto.Employee{
 		{
 			Id:                  6,
 			BadgeNumber:         4748,
@@ -103,7 +103,7 @@ func SaveAll(client proto.EmployeeServiceClient) {
 	}()
 	for _, e := range newEmployees {
 		if err := stream.Send(&proto.EmployeeRequest{
-			Employee: &e,
+			Employee: e,
 		}); err != nil {
 			log.Fatal(err)
 		}
@@ -161,7 +161,7 @@ func GetAll(client proto.EmployeeServiceClient) {
 		if err == io.EOF {
 			break
 		}
-		log.Printf("Got employee: %v\n", *res.Employee)
+		log.Printf("Got employee: %v\n", res.Employee)
 	}
 }
 

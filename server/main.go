@@ -53,7 +53,7 @@ func (e *employeeService) GetByBadgeNumber(ctx context.Context, req *proto.GetBy
 	for _, e := range employees {
 		if req.BadgeNumber == e.BadgeNumber {
 			return &proto.EmployeeResponse{
-				Employee: &e,
+				Employee: e,
 			}, nil
 		}
 	}
@@ -62,7 +62,7 @@ func (e *employeeService) GetByBadgeNumber(ctx context.Context, req *proto.GetBy
 
 func (e *employeeService) GetAll(req *proto.GetAllRequest, stream proto.EmployeeService_GetAllServer) error {
 	for _, e := range employees {
-		if err := stream.Send(&proto.EmployeeResponse{Employee: &e}); err != nil {
+		if err := stream.Send(&proto.EmployeeResponse{Employee: e}); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -109,7 +109,7 @@ func (e *employeeService) AddPhoto(stream proto.EmployeeService_AddPhotoServer) 
 
 func (e *employeeService) Save(ctx context.Context, req *proto.EmployeeRequest) (*proto.EmployeeResponse, error) {
 	log.Printf("before saving employee count is %d\n", len(employees))
-	employees = append(employees, *req.Employee)
+	employees = append(employees, req.Employee)
 	log.Printf("now employees count is %d\n", len(employees))
 	return &proto.EmployeeResponse{Employee: req.Employee}, nil
 }
@@ -124,7 +124,7 @@ func (e *employeeService) SaveAll(stream proto.EmployeeService_SaveAllServer) er
 		if err != nil {
 			return err
 		}
-		employees = append(employees, *emp.Employee)
+		employees = append(employees, emp.Employee)
 		if err := stream.Send(&proto.EmployeeResponse{
 			Employee: emp.Employee,
 		}); err != nil {

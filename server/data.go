@@ -2,7 +2,7 @@ package main
 
 import "github.com/Shelex/grpc-go-demo/proto"
 
-var employees = []proto.Employee{
+var employees = []*proto.Employee{
 	{
 		Id:                  1,
 		BadgeNumber:         7975,
