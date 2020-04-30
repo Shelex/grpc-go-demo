@@ -42,3 +42,9 @@ cert:
 .PHONY: lint
 lint: 
 	golangci-lint run
+
+.PHONY: deps
+deps:
+	go mod tidy
+	go mod download
+	go mod vendor
