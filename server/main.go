@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -12,7 +11,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Shelex/grpc-go-demo/entities"
 	"github.com/Shelex/grpc-go-demo/proto"
+	"github.com/Shelex/grpc-go-demo/storage"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
@@ -36,34 +37,42 @@ func main() {
 
 	opts := []grpc.ServerOption{grpc.Creds(creds)}
 	s := grpc.NewServer(opts...)
-	proto.RegisterEmployeeServiceServer(s, new(employeeService))
+	srv := &employeeService{
+		repository: storage.NewInMemStorage(),
+	}
+	proto.RegisterEmployeeServiceServer(s, srv)
 	log.Printf("starting server on port %s", port)
 	if err := s.Serve(lis); err != nil {
 		log.Fatal(err)
 	}
 }
 
-type employeeService struct{}
+type employeeService struct {
+	repository storage.Storage
+}
 
 func (e *employeeService) GetByBadgeNumber(ctx context.Context, req *proto.GetByBadgeNumberRequest) (*proto.EmployeeResponse, error) {
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
 		log.Printf("Metadata received: %v\n", md)
 	}
 	log.Printf("requested badge num: %d\n", req.BadgeNumber)
-	for _, e := range employees {
-		if req.BadgeNumber == e.BadgeNumber {
-			return &proto.EmployeeResponse{
-				Employee: e,
-			}, nil
-		}
+	employee, err := e.repository.GetByBadge(req.BadgeNumber)
+	if err != nil {
+		return nil, err
 	}
-	return nil, errors.New("employee not found")
+	return &proto.EmployeeResponse{
+		Employee: entities.EmployeeFromStorageToProto(employee),
+	}, nil
 }
 
 func (e *employeeService) GetAll(req *proto.GetAllRequest, stream proto.EmployeeService_GetAllServer) error {
+	employees, err := e.repository.GetAll()
+	if err != nil {
+		return err
+	}
 	for _, e := range employees {
-		if err := stream.Send(&proto.EmployeeResponse{Employee: e}); err != nil {
-			log.Fatal(err)
+		if err := stream.Send(&proto.EmployeeResponse{Employee: entities.EmployeeFromStorageToProto((e))}); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -71,19 +80,19 @@ func (e *employeeService) GetAll(req *proto.GetAllRequest, stream proto.Employee
 
 func (e *employeeService) AddPhoto(stream proto.EmployeeService_AddPhotoServer) error {
 	md, ok := metadata.FromIncomingContext(stream.Context())
-	var employeeBadge string
+	var employeeBadge int32
 	if ok {
 		badgeFromContext := md["badgenumber"][0]
-		for _, e := range employees {
-			if strconv.Itoa(int(e.BadgeNumber)) == badgeFromContext {
-				employeeBadge = badgeFromContext
-				break
-			}
+		badgeNum, err := strconv.Atoi(badgeFromContext)
+		if err != nil {
+			return err
 		}
-		if employeeBadge == "" {
-			return errors.New("employee with provided badge was not found")
+		employee, err := e.repository.GetByBadge(int32(badgeNum))
+		if err != nil {
+			return err
 		}
-		log.Printf("Receiving photo for badge num: %s\n", badgeFromContext)
+		employeeBadge = employee.BadgeNumber
+		log.Printf("Receiving photo for badge num: %d\n", employeeBadge)
 	}
 	imgData := []byte{}
 	for {
@@ -93,7 +102,7 @@ func (e *employeeService) AddPhoto(stream proto.EmployeeService_AddPhotoServer) 
 			if err := os.MkdirAll(assets, os.ModePerm); err != nil {
 				return err
 			}
-			filename := fmt.Sprintf("%s/%s-%s.png", assets, employeeBadge, strconv.FormatInt(time.Now().Unix(), 10))
+			filename := fmt.Sprintf("%s/%d-%s.png", assets, employeeBadge, strconv.FormatInt(time.Now().Unix(), 10))
 			if err := ioutil.WriteFile(filename, imgData, os.ModePerm); err != nil {
 				return err
 			}
@@ -108,14 +117,21 @@ func (e *employeeService) AddPhoto(stream proto.EmployeeService_AddPhotoServer) 
 }
 
 func (e *employeeService) Save(ctx context.Context, req *proto.EmployeeRequest) (*proto.EmployeeResponse, error) {
-	log.Printf("before saving employee count is %d\n", len(employees))
-	employees = append(employees, req.Employee)
-	log.Printf("now employees count is %d\n", len(employees))
+	if err := e.repository.AddEmployee(entities.EmployeeFromProtoToStorage(req.Employee)); err != nil {
+		return nil, err
+	}
+	count, _ := e.repository.Count()
+	log.Printf("employee with badge %d successfully saved; now have %d\n", req.Employee.BadgeNumber, count)
 	return &proto.EmployeeResponse{Employee: req.Employee}, nil
 }
 
 func (e *employeeService) SaveAll(stream proto.EmployeeService_SaveAllServer) error {
-	log.Printf("before saving employees count is %d\n", len(employees))
+	initialCount, err := e.repository.Count()
+	if err != nil {
+		return err
+	}
+	log.Printf("now have %d employees\n", initialCount)
+	var savedCount int
 	for {
 		emp, err := stream.Recv()
 		if err == io.EOF {
@@ -124,13 +140,20 @@ func (e *employeeService) SaveAll(stream proto.EmployeeService_SaveAllServer) er
 		if err != nil {
 			return err
 		}
-		employees = append(employees, emp.Employee)
+		if err := e.repository.AddEmployee(entities.EmployeeFromProtoToStorage(emp.Employee)); err != nil {
+			return err
+		}
 		if err := stream.Send(&proto.EmployeeResponse{
 			Employee: emp.Employee,
 		}); err != nil {
-			log.Fatal(err)
+			return err
 		}
+		savedCount++
 	}
-	log.Printf("now employees count is %d\n", len(employees))
+	current, err := e.repository.Count()
+	if err != nil {
+		return err
+	}
+	log.Printf("successfully saved %d employees; now have %d\n", savedCount, current)
 	return nil
 }
