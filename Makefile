@@ -48,3 +48,8 @@ deps:
 	go mod tidy
 	go mod download
 	go mod vendor
+
+.PHONY: gql
+gql:
+	cd client && rm -f generated.go models/*_gen.go &&\
+	go run github.com/99designs/gqlgen generate

@@ -1,0 +1,42 @@
+type Vacation {
+  Id: Int!
+  StartDate: Int!
+  Duration: Float!
+  IsCancelled: Boolean!
+}
+
+type Employee {
+  Id: Int!
+  BadgeNumber: Int!
+  FirstName: String!
+  LastName: String!
+  VacationAccrualRate: Float!
+  VacationAccrued: Float!
+  Vacations: [Vacation]
+}
+
+input EmployeeInput {
+  Id: Int!
+  BadgeNumber: Int!
+  FirstName: String!
+  LastName: String!
+  VacationAccrualRate: Float!
+}
+
+scalar Upload
+
+type Query {
+  getByBadge (badgeNumber: Int!): Employee
+  getAll: [Employee!]!
+}
+
+type Mutation {
+	AddPhoto (file: Upload!, badgeNumber: Int!): Boolean!
+	Save (employee: EmployeeInput!): Employee!
+	SaveAll (employees: [EmployeeInput!]!): [Employee]
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
