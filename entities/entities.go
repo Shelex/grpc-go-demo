@@ -55,5 +55,4 @@ func VacationsFromStorageToProto(vacations []Vacation) []*proto.Vacation {
 		})
 	}
 	return protoVacations
-
 }

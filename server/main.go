@@ -53,7 +53,7 @@ type employeeService struct {
 
 func (e *employeeService) GetByBadgeNumber(ctx context.Context, req *proto.GetByBadgeNumberRequest) (*proto.EmployeeResponse, error) {
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
-		log.Printf("Metadata received: %v\n", md)
+		log.Printf("metadata received: %v\n", md)
 	}
 	log.Printf("requested badge num: %d\n", req.BadgeNumber)
 	employee, err := e.repository.GetByBadge(req.BadgeNumber)
@@ -92,13 +92,13 @@ func (e *employeeService) AddPhoto(stream proto.EmployeeService_AddPhotoServer) 
 			return err
 		}
 		employeeBadge = employee.BadgeNumber
-		log.Printf("Receiving photo for badge num: %d\n", employeeBadge)
+		log.Printf("receiving photo for badge num: %d\n", employeeBadge)
 	}
 	imgData := []byte{}
 	for {
 		data, err := stream.Recv()
 		if err == io.EOF {
-			log.Printf("File received with length: %d\n", len(imgData))
+			log.Printf("file received with length: %d\n", len(imgData))
 			if err := os.MkdirAll(assets, os.ModePerm); err != nil {
 				return err
 			}
@@ -111,7 +111,7 @@ func (e *employeeService) AddPhoto(stream proto.EmployeeService_AddPhotoServer) 
 		if err != nil {
 			return err
 		}
-		log.Printf("Received %d bytes\n", len(data.Data))
+		log.Printf("received %d bytes\n", len(data.Data))
 		imgData = append(imgData, data.Data...)
 	}
 }
