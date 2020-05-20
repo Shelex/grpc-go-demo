@@ -20,6 +20,11 @@ type EmployeeInput struct {
 	VacationAccrualRate float64 `json:"VacationAccrualRate"`
 }
 
+type EmployeeSaveResult struct {
+	SavedEmployees []*Employee `json:"savedEmployees"`
+	Error          string      `json:"error"`
+}
+
 type Vacation struct {
 	ID          int     `json:"Id"`
 	StartDate   int     `json:"StartDate"`

@@ -42,7 +42,6 @@ func (r *mutationResolver) AddPhoto(ctx context.Context, file graphql.Upload, ba
 		}
 	}
 	res, err := stream.CloseAndRecv()
-	log.Printf("got %v", res)
 	if err != nil {
 		return false, err
 	}
@@ -58,42 +57,41 @@ func (r *mutationResolver) Save(ctx context.Context, employee model.EmployeeInpu
 	return factory.EmployeeFromProtoToApi(res.Employee), nil
 }
 
-func (r *mutationResolver) SaveAll(ctx context.Context, employees []*model.EmployeeInput) ([]*model.Employee, error) {
+func (r *mutationResolver) SaveAll(ctx context.Context, employees []*model.EmployeeInput) (*model.EmployeeSaveResult, error) {
 	stream, err := r.employeeServiceClient.SaveAll(context.Background())
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	done := make(chan struct{})
-	errorCh := make(chan error)
-	saved := make([]*model.Employee, len(employees))
+	done := make(chan error)
+	result := &model.EmployeeSaveResult{}
 	go func() {
 		for {
 			res, err := stream.Recv()
 			if err == io.EOF {
-				done <- struct{}{}
+				done <- nil
 				break
 			}
 			if err != nil {
-				errorCh <- err
+				done <- err
+				continue
 			}
-			saved = append(saved, factory.EmployeeFromProtoToApi(res.Employee))
+			result.SavedEmployees = append(result.SavedEmployees, factory.EmployeeFromProtoToApi(res.Employee))
 		}
 	}()
 	for _, e := range employees {
 		if err := stream.Send(&proto.EmployeeRequest{
 			Employee: factory.EmployeeFromAPIToProto(*e),
 		}); err != nil {
-			return nil, err
+			return result, err
 		}
 	}
 	if err := stream.CloseSend(); err != nil {
-		return nil, err
+		return result, err
 	}
-	<-done
-	if err := <-errorCh; err != nil {
-		return nil, err
+	if err := <-done; err != nil {
+		result.Error = err.Error()
 	}
-	return saved, nil
+	return result, err
 }
 
 func (r *queryResolver) GetByBadge(ctx context.Context, badgeNumber int) (*model.Employee, error) {
@@ -110,7 +108,7 @@ func (r *queryResolver) GetByBadge(ctx context.Context, badgeNumber int) (*model
 func (r *queryResolver) GetAll(ctx context.Context) ([]*model.Employee, error) {
 	stream, err := r.employeeServiceClient.GetAll(context.Background(), &proto.GetAllRequest{})
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	employees := make([]*model.Employee, 0, 10)
 	for {

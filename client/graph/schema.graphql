@@ -23,6 +23,11 @@ input EmployeeInput {
   VacationAccrualRate: Float!
 }
 
+type EmployeeSaveResult {
+  savedEmployees: [Employee!]!
+  error: String!
+}
+
 scalar Upload
 
 type Query {
@@ -33,7 +38,7 @@ type Query {
 type Mutation {
 	AddPhoto (file: Upload!, badgeNumber: Int!): Boolean!
 	Save (employee: EmployeeInput!): Employee!
-	SaveAll (employees: [EmployeeInput!]!): [Employee]
+	SaveAll (employees: [EmployeeInput!]!): EmployeeSaveResult!
 }
 
 schema {

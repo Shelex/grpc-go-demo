@@ -2,7 +2,7 @@ package storage
 
 import (
 	"errors"
-
+	"fmt"
 	"github.com/Shelex/grpc-go-demo/entities"
 )
 
@@ -80,7 +80,7 @@ func (i *InMem) GetAll() ([]entities.Employee, error) {
 func (i *InMem) AddEmployee(e entities.Employee) error {
 	for _, employee := range i.employees {
 		if e.BadgeNumber == employee.BadgeNumber {
-			return errors.New("badge number is duplicated")
+			return fmt.Errorf("badge number %d is duplicated", e.BadgeNumber)
 		}
 	}
 	i.employees = append(i.employees, e)
