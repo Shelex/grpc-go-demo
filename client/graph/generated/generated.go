@@ -53,6 +53,11 @@ type ComplexityRoot struct {
 		Vacations           func(childComplexity int) int
 	}
 
+	EmployeeSaveResult struct {
+		Error          func(childComplexity int) int
+		SavedEmployees func(childComplexity int) int
+	}
+
 	Mutation struct {
 		AddPhoto func(childComplexity int, file graphql.Upload, badgeNumber int) int
 		Save     func(childComplexity int, employee model.EmployeeInput) int
@@ -75,7 +80,7 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	AddPhoto(ctx context.Context, file graphql.Upload, badgeNumber int) (bool, error)
 	Save(ctx context.Context, employee model.EmployeeInput) (*model.Employee, error)
-	SaveAll(ctx context.Context, employees []*model.EmployeeInput) ([]*model.Employee, error)
+	SaveAll(ctx context.Context, employees []*model.EmployeeInput) (*model.EmployeeSaveResult, error)
 }
 type QueryResolver interface {
 	GetByBadge(ctx context.Context, badgeNumber int) (*model.Employee, error)
@@ -145,6 +150,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Employee.Vacations(childComplexity), true
+
+	case "EmployeeSaveResult.error":
+		if e.complexity.EmployeeSaveResult.Error == nil {
+			break
+		}
+
+		return e.complexity.EmployeeSaveResult.Error(childComplexity), true
+
+	case "EmployeeSaveResult.savedEmployees":
+		if e.complexity.EmployeeSaveResult.SavedEmployees == nil {
+			break
+		}
+
+		return e.complexity.EmployeeSaveResult.SavedEmployees(childComplexity), true
 
 	case "Mutation.AddPhoto":
 		if e.complexity.Mutation.AddPhoto == nil {
@@ -318,6 +337,11 @@ input EmployeeInput {
   VacationAccrualRate: Float!
 }
 
+type EmployeeSaveResult {
+  savedEmployees: [Employee!]!
+  error: String!
+}
+
 scalar Upload
 
 type Query {
@@ -328,7 +352,7 @@ type Query {
 type Mutation {
 	AddPhoto (file: Upload!, badgeNumber: Int!): Boolean!
 	Save (employee: EmployeeInput!): Employee!
-	SaveAll (employees: [EmployeeInput!]!): [Employee]
+	SaveAll (employees: [EmployeeInput!]!): EmployeeSaveResult!
 }
 
 schema {
@@ -692,6 +716,74 @@ func (ec *executionContext) _Employee_Vacations(ctx context.Context, field graph
 	return ec.marshalOVacation2ᚕᚖgithubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐVacation(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _EmployeeSaveResult_savedEmployees(ctx context.Context, field graphql.CollectedField, obj *model.EmployeeSaveResult) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "EmployeeSaveResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SavedEmployees, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Employee)
+	fc.Result = res
+	return ec.marshalNEmployee2ᚕᚖgithubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐEmployeeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _EmployeeSaveResult_error(ctx context.Context, field graphql.CollectedField, obj *model.EmployeeSaveResult) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "EmployeeSaveResult",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Error, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_AddPhoto(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -805,11 +897,14 @@ func (ec *executionContext) _Mutation_SaveAll(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Employee)
+	res := resTmp.(*model.EmployeeSaveResult)
 	fc.Result = res
-	return ec.marshalOEmployee2ᚕᚖgithubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐEmployee(ctx, field.Selections, res)
+	return ec.marshalNEmployeeSaveResult2ᚖgithubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐEmployeeSaveResult(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getByBadge(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2248,6 +2343,38 @@ func (ec *executionContext) _Employee(ctx context.Context, sel ast.SelectionSet,
 	return out
 }
 
+var employeeSaveResultImplementors = []string{"EmployeeSaveResult"}
+
+func (ec *executionContext) _EmployeeSaveResult(ctx context.Context, sel ast.SelectionSet, obj *model.EmployeeSaveResult) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, employeeSaveResultImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("EmployeeSaveResult")
+		case "savedEmployees":
+			out.Values[i] = ec._EmployeeSaveResult_savedEmployees(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "error":
+			out.Values[i] = ec._EmployeeSaveResult_error(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -2275,6 +2402,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "SaveAll":
 			out.Values[i] = ec._Mutation_SaveAll(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2725,6 +2855,20 @@ func (ec *executionContext) unmarshalNEmployeeInput2ᚖgithubᚗcomᚋShelexᚋg
 	return &res, err
 }
 
+func (ec *executionContext) marshalNEmployeeSaveResult2githubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐEmployeeSaveResult(ctx context.Context, sel ast.SelectionSet, v model.EmployeeSaveResult) graphql.Marshaler {
+	return ec._EmployeeSaveResult(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNEmployeeSaveResult2ᚖgithubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐEmployeeSaveResult(ctx context.Context, sel ast.SelectionSet, v *model.EmployeeSaveResult) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._EmployeeSaveResult(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
 	return graphql.UnmarshalFloat(v)
 }
@@ -3032,46 +3176,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 
 func (ec *executionContext) marshalOEmployee2githubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐEmployee(ctx context.Context, sel ast.SelectionSet, v model.Employee) graphql.Marshaler {
 	return ec._Employee(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOEmployee2ᚕᚖgithubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐEmployee(ctx context.Context, sel ast.SelectionSet, v []*model.Employee) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOEmployee2ᚖgithubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐEmployee(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
 }
 
 func (ec *executionContext) marshalOEmployee2ᚖgithubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐEmployee(ctx context.Context, sel ast.SelectionSet, v *model.Employee) graphql.Marshaler {

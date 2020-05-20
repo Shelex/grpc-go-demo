@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -132,6 +133,7 @@ func (e *employeeService) SaveAll(stream proto.EmployeeService_SaveAllServer) er
 	}
 	log.Printf("now have %d employees\n", initialCount)
 	var savedCount int
+	var errorMessage string
 	for {
 		emp, err := stream.Recv()
 		if err == io.EOF {
@@ -141,7 +143,8 @@ func (e *employeeService) SaveAll(stream proto.EmployeeService_SaveAllServer) er
 			return err
 		}
 		if err := e.repository.AddEmployee(entities.EmployeeFromProtoToStorage(emp.Employee)); err != nil {
-			return err
+			errorMessage += fmt.Sprintf("\n%s", err.Error())
+			continue
 		}
 		if err := stream.Send(&proto.EmployeeResponse{
 			Employee: emp.Employee,
@@ -150,10 +153,13 @@ func (e *employeeService) SaveAll(stream proto.EmployeeService_SaveAllServer) er
 		}
 		savedCount++
 	}
+	if errorMessage != "" {
+		return errors.New(errorMessage)
+	}
 	current, err := e.repository.Count()
 	if err != nil {
 		return err
 	}
-	log.Printf("successfully saved %d employees; now have %d\n", savedCount, current)
+	log.Printf("successfully saved %d employees;\n now have %d\n", savedCount, current)
 	return nil
 }
