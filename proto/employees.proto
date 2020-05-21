@@ -7,7 +7,7 @@ service EmployeeService {
     rpc GetByBadgeNumber (GetByBadgeNumberRequest) returns (EmployeeResponse);
     rpc Save (EmployeeRequest) returns (EmployeeResponse);
     // Client streaming
-    rpc AddPhoto (stream AddPhotoRequest) returns (AddPhotoResponse);
+    rpc AddEmployeeAttachment (stream AddAttachmentRequest) returns (AddAttachmentResponse);
     // Server streaming
     rpc GetAll (GetAllRequest) returns (stream EmployeeResponse);
     // Bidirectional streaming
@@ -23,6 +23,7 @@ message Employee {
     float vacationAccrualRate = 5;
     float vacationAccrued = 6;
     repeated Vacation vacations = 7;
+    repeated string Documents = 8;
 }
 
 message Vacation {
@@ -46,10 +47,10 @@ message EmployeeResponse {
     Employee employee = 1;
 }
 
-message AddPhotoRequest {
+message AddAttachmentRequest {
     bytes data = 1;
 }
 
-message AddPhotoResponse {
+message AddAttachmentResponse {
     bool isOk = 1;
 }

@@ -24,6 +24,7 @@ func EmployeeFromProtoToApi(e *proto.Employee) *model.Employee {
 		VacationAccrualRate: float64(e.VacationAccrualRate),
 		VacationAccrued:     float64(e.VacationAccrued),
 		Vacations:           VacationsFromProtoToApi(e.Vacations),
+		Documents:           e.Documents,
 	}
 }
 

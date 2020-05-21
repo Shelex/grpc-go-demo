@@ -45,6 +45,7 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 	Employee struct {
 		BadgeNumber         func(childComplexity int) int
+		Documents           func(childComplexity int) int
 		FirstName           func(childComplexity int) int
 		ID                  func(childComplexity int) int
 		LastName            func(childComplexity int) int
@@ -59,9 +60,9 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddPhoto func(childComplexity int, file graphql.Upload, badgeNumber int) int
-		Save     func(childComplexity int, employee model.EmployeeInput) int
-		SaveAll  func(childComplexity int, employees []*model.EmployeeInput) int
+		AddEmployeeAttachment func(childComplexity int, file graphql.Upload, badgeNumber int) int
+		Save                  func(childComplexity int, employee model.EmployeeInput) int
+		SaveAll               func(childComplexity int, employees []*model.EmployeeInput) int
 	}
 
 	Query struct {
@@ -78,7 +79,7 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	AddPhoto(ctx context.Context, file graphql.Upload, badgeNumber int) (bool, error)
+	AddEmployeeAttachment(ctx context.Context, file graphql.Upload, badgeNumber int) (bool, error)
 	Save(ctx context.Context, employee model.EmployeeInput) (*model.Employee, error)
 	SaveAll(ctx context.Context, employees []*model.EmployeeInput) (*model.EmployeeSaveResult, error)
 }
@@ -108,6 +109,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Employee.BadgeNumber(childComplexity), true
+
+	case "Employee.Documents":
+		if e.complexity.Employee.Documents == nil {
+			break
+		}
+
+		return e.complexity.Employee.Documents(childComplexity), true
 
 	case "Employee.FirstName":
 		if e.complexity.Employee.FirstName == nil {
@@ -165,17 +173,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.EmployeeSaveResult.SavedEmployees(childComplexity), true
 
-	case "Mutation.AddPhoto":
-		if e.complexity.Mutation.AddPhoto == nil {
+	case "Mutation.AddEmployeeAttachment":
+		if e.complexity.Mutation.AddEmployeeAttachment == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_AddPhoto_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_AddEmployeeAttachment_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddPhoto(childComplexity, args["file"].(graphql.Upload), args["badgeNumber"].(int)), true
+		return e.complexity.Mutation.AddEmployeeAttachment(childComplexity, args["file"].(graphql.Upload), args["badgeNumber"].(int)), true
 
 	case "Mutation.Save":
 		if e.complexity.Mutation.Save == nil {
@@ -327,6 +335,7 @@ type Employee {
   VacationAccrualRate: Float!
   VacationAccrued: Float!
   Vacations: [Vacation]
+  Documents: [String!]
 }
 
 input EmployeeInput {
@@ -350,7 +359,7 @@ type Query {
 }
 
 type Mutation {
-	AddPhoto (file: Upload!, badgeNumber: Int!): Boolean!
+	AddEmployeeAttachment (file: Upload!, badgeNumber: Int!): Boolean!
 	Save (employee: EmployeeInput!): Employee!
 	SaveAll (employees: [EmployeeInput!]!): EmployeeSaveResult!
 }
@@ -367,7 +376,7 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_Mutation_AddPhoto_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_AddEmployeeAttachment_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 graphql.Upload
@@ -716,6 +725,37 @@ func (ec *executionContext) _Employee_Vacations(ctx context.Context, field graph
 	return ec.marshalOVacation2ᚕᚖgithubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐVacation(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Employee_Documents(ctx context.Context, field graphql.CollectedField, obj *model.Employee) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Employee",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Documents, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _EmployeeSaveResult_savedEmployees(ctx context.Context, field graphql.CollectedField, obj *model.EmployeeSaveResult) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -784,7 +824,7 @@ func (ec *executionContext) _EmployeeSaveResult_error(ctx context.Context, field
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_AddPhoto(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_AddEmployeeAttachment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -800,7 +840,7 @@ func (ec *executionContext) _Mutation_AddPhoto(ctx context.Context, field graphq
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_AddPhoto_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_AddEmployeeAttachment_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -808,7 +848,7 @@ func (ec *executionContext) _Mutation_AddPhoto(ctx context.Context, field graphq
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddPhoto(rctx, args["file"].(graphql.Upload), args["badgeNumber"].(int))
+		return ec.resolvers.Mutation().AddEmployeeAttachment(rctx, args["file"].(graphql.Upload), args["badgeNumber"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2332,6 +2372,8 @@ func (ec *executionContext) _Employee(ctx context.Context, sel ast.SelectionSet,
 			}
 		case "Vacations":
 			out.Values[i] = ec._Employee_Vacations(ctx, field, obj)
+		case "Documents":
+			out.Values[i] = ec._Employee_Documents(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2390,8 +2432,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "AddPhoto":
-			out.Values[i] = ec._Mutation_AddPhoto(ctx, field)
+		case "AddEmployeeAttachment":
+			out.Values[i] = ec._Mutation_AddEmployeeAttachment(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3191,6 +3233,38 @@ func (ec *executionContext) unmarshalOString2string(ctx context.Context, v inter
 
 func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	return graphql.MarshalString(v)
+}
+
+func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

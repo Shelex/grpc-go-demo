@@ -13,6 +13,7 @@ type Employee {
   VacationAccrualRate: Float!
   VacationAccrued: Float!
   Vacations: [Vacation]
+  Documents: [String!]
 }
 
 input EmployeeInput {
@@ -36,7 +37,7 @@ type Query {
 }
 
 type Mutation {
-	AddPhoto (file: Upload!, badgeNumber: Int!): Boolean!
+	AddEmployeeAttachment (file: Upload!, badgeNumber: Int!): Boolean!
 	Save (employee: EmployeeInput!): Employee!
 	SaveAll (employees: [EmployeeInput!]!): EmployeeSaveResult!
 }

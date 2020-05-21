@@ -5,24 +5,21 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
-	"os"
 	"strconv"
-	"time"
 
 	"github.com/Shelex/grpc-go-demo/entities"
 	"github.com/Shelex/grpc-go-demo/proto"
 	"github.com/Shelex/grpc-go-demo/storage"
+	"github.com/Shelex/grpc-go-demo/storage/documents"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 )
 
 const (
-	port   = ":9000"
-	assets = "imageRepository"
+	port = ":9000"
 )
 
 func main() {
@@ -40,6 +37,7 @@ func main() {
 	s := grpc.NewServer(opts...)
 	srv := &employeeService{
 		repository: storage.NewInMemStorage(),
+		documents:  documents.NewLocalFS(),
 	}
 	proto.RegisterEmployeeServiceServer(s, srv)
 	log.Printf("starting server on port %s", port)
@@ -50,6 +48,7 @@ func main() {
 
 type employeeService struct {
 	repository storage.Storage
+	documents  documents.FileStorage
 }
 
 func (e *employeeService) GetByBadgeNumber(ctx context.Context, req *proto.GetByBadgeNumberRequest) (*proto.EmployeeResponse, error) {
@@ -61,6 +60,9 @@ func (e *employeeService) GetByBadgeNumber(ctx context.Context, req *proto.GetBy
 	if err != nil {
 		return nil, err
 	}
+	employeeDocuments, _ := e.documents.GetEmployeeDocuments(req.BadgeNumber)
+
+	employee.Documents = employeeDocuments
 	return &proto.EmployeeResponse{
 		Employee: entities.EmployeeFromStorageToProto(employee),
 	}, nil
@@ -71,15 +73,19 @@ func (e *employeeService) GetAll(req *proto.GetAllRequest, stream proto.Employee
 	if err != nil {
 		return err
 	}
-	for _, e := range employees {
-		if err := stream.Send(&proto.EmployeeResponse{Employee: entities.EmployeeFromStorageToProto((e))}); err != nil {
+	for _, emp := range employees {
+		employeeDocuments, _ := e.documents.GetEmployeeDocuments(emp.BadgeNumber)
+
+		emp.Documents = employeeDocuments
+
+		if err := stream.Send(&proto.EmployeeResponse{Employee: entities.EmployeeFromStorageToProto(emp)}); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (e *employeeService) AddPhoto(stream proto.EmployeeService_AddPhotoServer) error {
+func (e *employeeService) AddEmployeeAttachment(stream proto.EmployeeService_AddEmployeeAttachmentServer) error {
 	md, ok := metadata.FromIncomingContext(stream.Context())
 	var employeeBadge int32
 	if ok {
@@ -100,14 +106,10 @@ func (e *employeeService) AddPhoto(stream proto.EmployeeService_AddPhotoServer) 
 		data, err := stream.Recv()
 		if err == io.EOF {
 			log.Printf("file received with length: %d\n", len(imgData))
-			if err := os.MkdirAll(assets, os.ModePerm); err != nil {
+			if err := e.documents.SaveDocument(employeeBadge, imgData); err != nil {
 				return err
 			}
-			filename := fmt.Sprintf("%s/%d-%s.png", assets, employeeBadge, strconv.FormatInt(time.Now().Unix(), 10))
-			if err := ioutil.WriteFile(filename, imgData, os.ModePerm); err != nil {
-				return err
-			}
-			return stream.SendAndClose(&proto.AddPhotoResponse{IsOk: true})
+			return stream.SendAndClose(&proto.AddAttachmentResponse{IsOk: true})
 		}
 		if err != nil {
 			return err

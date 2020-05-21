@@ -17,11 +17,11 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-func (r *mutationResolver) AddPhoto(ctx context.Context, file graphql.Upload, badgeNumber int) (bool, error) {
+func (r *mutationResolver) AddEmployeeAttachment(ctx context.Context, file graphql.Upload, badgeNumber int) (bool, error) {
 	log.Printf("got file: %s with size: %d, and CT:%s", file.Filename, file.Size, file.ContentType)
 	md := metadata.New(map[string]string{"badgenumber": strconv.Itoa(badgeNumber)})
 	ctx = metadata.NewOutgoingContext(ctx, md)
-	stream, err := r.employeeServiceClient.AddPhoto(ctx)
+	stream, err := r.employeeServiceClient.AddEmployeeAttachment(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -37,7 +37,7 @@ func (r *mutationResolver) AddPhoto(ctx context.Context, file graphql.Upload, ba
 		if n < len(chunk) {
 			chunk = chunk[:n]
 		}
-		if err := stream.Send(&proto.AddPhotoRequest{Data: chunk}); err != nil {
+		if err := stream.Send(&proto.AddAttachmentRequest{Data: chunk}); err != nil {
 			return false, err
 		}
 	}

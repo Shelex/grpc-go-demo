@@ -1,6 +1,6 @@
 coverage.out
 *.pem
-imageRepository/*
+storage/documents/local
 cmd
 .vscode
 .DS_Store

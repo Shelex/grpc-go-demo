@@ -10,6 +10,7 @@ type Employee struct {
 	VacationAccrualRate float64     `json:"VacationAccrualRate"`
 	VacationAccrued     float64     `json:"VacationAccrued"`
 	Vacations           []*Vacation `json:"Vacations"`
+	Documents           []string    `json:"Documents"`
 }
 
 type EmployeeInput struct {

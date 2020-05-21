@@ -29,6 +29,7 @@ query {
     BadgeNumber
     FirstName
     LastName
+    Documents
   }
 }
 
@@ -41,6 +42,7 @@ query {
     FirstName
     LastName
     BadgeNumber
+    Documents
   }
 }
 ```
@@ -105,10 +107,10 @@ query {
 }
 
 ```
- - mutation `AddPhoto` - to add some photo for employee
+ - mutation `AddEmployeeAttachment` - to add some photo for employee
  ```
  mutation ($image: Upload!, $num: Int!) {
-  AddPhoto (file: $image, badgeNumber: $num)
+  AddEmployeeAttachment (file: $image, badgeNumber: $num)
 }
 
 variables: {

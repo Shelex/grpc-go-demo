@@ -19,6 +19,13 @@ type Employee struct {
 	VacationAccrualRate float32
 	VacationAccrued     float32
 	Vacations           []Vacation
+	Documents           []string
+}
+
+type Document struct {
+	FileName  string
+	Data      []byte
+	CreatedAt int64 // Unix timestamp
 }
 
 func EmployeeFromStorageToProto(e Employee) *proto.Employee {
@@ -30,6 +37,7 @@ func EmployeeFromStorageToProto(e Employee) *proto.Employee {
 		VacationAccrualRate: e.VacationAccrualRate,
 		VacationAccrued:     e.VacationAccrued,
 		Vacations:           VacationsFromStorageToProto(e.Vacations),
+		Documents:           e.Documents,
 	}
 }
 
