@@ -34,14 +34,15 @@ type Employee struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id                  int32       `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	ID                  string      `protobuf:"bytes,1,opt,name=ID,proto3" json:"ID,omitempty"`
 	BadgeNumber         int32       `protobuf:"varint,2,opt,name=badgeNumber,proto3" json:"badgeNumber,omitempty"`
 	FirstName           string      `protobuf:"bytes,3,opt,name=firstName,proto3" json:"firstName,omitempty"`
 	LastName            string      `protobuf:"bytes,4,opt,name=lastName,proto3" json:"lastName,omitempty"`
-	VacationAccrualRate float32     `protobuf:"fixed32,5,opt,name=vacationAccrualRate,proto3" json:"vacationAccrualRate,omitempty"`
-	VacationAccrued     float32     `protobuf:"fixed32,6,opt,name=vacationAccrued,proto3" json:"vacationAccrued,omitempty"`
-	Vacations           []*Vacation `protobuf:"bytes,7,rep,name=vacations,proto3" json:"vacations,omitempty"`
-	Documents           []string    `protobuf:"bytes,8,rep,name=Documents,proto3" json:"Documents,omitempty"`
+	CountryCode         string      `protobuf:"bytes,5,opt,name=countryCode,proto3" json:"countryCode,omitempty"`
+	VacationAccrualRate float32     `protobuf:"fixed32,6,opt,name=vacationAccrualRate,proto3" json:"vacationAccrualRate,omitempty"`
+	VacationAccrued     float32     `protobuf:"fixed32,7,opt,name=vacationAccrued,proto3" json:"vacationAccrued,omitempty"`
+	Vacations           []*Vacation `protobuf:"bytes,8,rep,name=vacations,proto3" json:"vacations,omitempty"`
+	Documents           []string    `protobuf:"bytes,9,rep,name=documents,proto3" json:"documents,omitempty"`
 }
 
 func (x *Employee) Reset() {
@@ -76,11 +77,11 @@ func (*Employee) Descriptor() ([]byte, []int) {
 	return file_employees_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Employee) GetId() int32 {
+func (x *Employee) GetID() string {
 	if x != nil {
-		return x.Id
+		return x.ID
 	}
-	return 0
+	return ""
 }
 
 func (x *Employee) GetBadgeNumber() int32 {
@@ -100,6 +101,13 @@ func (x *Employee) GetFirstName() string {
 func (x *Employee) GetLastName() string {
 	if x != nil {
 		return x.LastName
+	}
+	return ""
+}
+
+func (x *Employee) GetCountryCode() string {
+	if x != nil {
+		return x.CountryCode
 	}
 	return ""
 }
@@ -137,10 +145,11 @@ type Vacation struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id          int32   `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	StartDate   int64   `protobuf:"varint,2,opt,name=startDate,proto3" json:"startDate,omitempty"`
-	Duration    float32 `protobuf:"fixed32,3,opt,name=duration,proto3" json:"duration,omitempty"`
-	IsCancelled bool    `protobuf:"varint,4,opt,name=isCancelled,proto3" json:"isCancelled,omitempty"`
+	ID            string  `protobuf:"bytes,1,opt,name=ID,proto3" json:"ID,omitempty"`
+	StartDate     int64   `protobuf:"varint,2,opt,name=startDate,proto3" json:"startDate,omitempty"`
+	DurationHours float32 `protobuf:"fixed32,3,opt,name=durationHours,proto3" json:"durationHours,omitempty"`
+	Approved      bool    `protobuf:"varint,4,opt,name=approved,proto3" json:"approved,omitempty"`
+	Cancelled     bool    `protobuf:"varint,5,opt,name=cancelled,proto3" json:"cancelled,omitempty"`
 }
 
 func (x *Vacation) Reset() {
@@ -175,11 +184,11 @@ func (*Vacation) Descriptor() ([]byte, []int) {
 	return file_employees_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *Vacation) GetId() int32 {
+func (x *Vacation) GetID() string {
 	if x != nil {
-		return x.Id
+		return x.ID
 	}
-	return 0
+	return ""
 }
 
 func (x *Vacation) GetStartDate() int64 {
@@ -189,18 +198,104 @@ func (x *Vacation) GetStartDate() int64 {
 	return 0
 }
 
-func (x *Vacation) GetDuration() float32 {
+func (x *Vacation) GetDurationHours() float32 {
 	if x != nil {
-		return x.Duration
+		return x.DurationHours
 	}
 	return 0
 }
 
-func (x *Vacation) GetIsCancelled() bool {
+func (x *Vacation) GetApproved() bool {
 	if x != nil {
-		return x.IsCancelled
+		return x.Approved
 	}
 	return false
+}
+
+func (x *Vacation) GetCancelled() bool {
+	if x != nil {
+		return x.Cancelled
+	}
+	return false
+}
+
+type Attachment struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	ID        string `protobuf:"bytes,1,opt,name=ID,proto3" json:"ID,omitempty"`
+	UserID    string `protobuf:"bytes,2,opt,name=userID,proto3" json:"userID,omitempty"`
+	Filename  string `protobuf:"bytes,3,opt,name=filename,proto3" json:"filename,omitempty"`
+	Data      []byte `protobuf:"bytes,4,opt,name=data,proto3" json:"data,omitempty"`
+	CreatedAt int64  `protobuf:"varint,5,opt,name=createdAt,proto3" json:"createdAt,omitempty"`
+}
+
+func (x *Attachment) Reset() {
+	*x = Attachment{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_employees_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Attachment) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Attachment) ProtoMessage() {}
+
+func (x *Attachment) ProtoReflect() protoreflect.Message {
+	mi := &file_employees_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Attachment.ProtoReflect.Descriptor instead.
+func (*Attachment) Descriptor() ([]byte, []int) {
+	return file_employees_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *Attachment) GetID() string {
+	if x != nil {
+		return x.ID
+	}
+	return ""
+}
+
+func (x *Attachment) GetUserID() string {
+	if x != nil {
+		return x.UserID
+	}
+	return ""
+}
+
+func (x *Attachment) GetFilename() string {
+	if x != nil {
+		return x.Filename
+	}
+	return ""
+}
+
+func (x *Attachment) GetData() []byte {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+func (x *Attachment) GetCreatedAt() int64 {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return 0
 }
 
 type GetAllRequest struct {
@@ -212,7 +307,7 @@ type GetAllRequest struct {
 func (x *GetAllRequest) Reset() {
 	*x = GetAllRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_employees_proto_msgTypes[2]
+		mi := &file_employees_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -225,7 +320,7 @@ func (x *GetAllRequest) String() string {
 func (*GetAllRequest) ProtoMessage() {}
 
 func (x *GetAllRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_employees_proto_msgTypes[2]
+	mi := &file_employees_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -238,34 +333,34 @@ func (x *GetAllRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAllRequest.ProtoReflect.Descriptor instead.
 func (*GetAllRequest) Descriptor() ([]byte, []int) {
-	return file_employees_proto_rawDescGZIP(), []int{2}
+	return file_employees_proto_rawDescGZIP(), []int{3}
 }
 
-type GetByBadgeNumberRequest struct {
+type ByIDRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	BadgeNumber int32 `protobuf:"varint,1,opt,name=badgeNumber,proto3" json:"badgeNumber,omitempty"`
+	ID string `protobuf:"bytes,1,opt,name=ID,proto3" json:"ID,omitempty"`
 }
 
-func (x *GetByBadgeNumberRequest) Reset() {
-	*x = GetByBadgeNumberRequest{}
+func (x *ByIDRequest) Reset() {
+	*x = ByIDRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_employees_proto_msgTypes[3]
+		mi := &file_employees_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
 }
 
-func (x *GetByBadgeNumberRequest) String() string {
+func (x *ByIDRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetByBadgeNumberRequest) ProtoMessage() {}
+func (*ByIDRequest) ProtoMessage() {}
 
-func (x *GetByBadgeNumberRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_employees_proto_msgTypes[3]
+func (x *ByIDRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_employees_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -276,16 +371,16 @@ func (x *GetByBadgeNumberRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetByBadgeNumberRequest.ProtoReflect.Descriptor instead.
-func (*GetByBadgeNumberRequest) Descriptor() ([]byte, []int) {
-	return file_employees_proto_rawDescGZIP(), []int{3}
+// Deprecated: Use ByIDRequest.ProtoReflect.Descriptor instead.
+func (*ByIDRequest) Descriptor() ([]byte, []int) {
+	return file_employees_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *GetByBadgeNumberRequest) GetBadgeNumber() int32 {
+func (x *ByIDRequest) GetID() string {
 	if x != nil {
-		return x.BadgeNumber
+		return x.ID
 	}
-	return 0
+	return ""
 }
 
 type EmployeeRequest struct {
@@ -299,7 +394,7 @@ type EmployeeRequest struct {
 func (x *EmployeeRequest) Reset() {
 	*x = EmployeeRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_employees_proto_msgTypes[4]
+		mi := &file_employees_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -312,7 +407,7 @@ func (x *EmployeeRequest) String() string {
 func (*EmployeeRequest) ProtoMessage() {}
 
 func (x *EmployeeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_employees_proto_msgTypes[4]
+	mi := &file_employees_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -325,7 +420,7 @@ func (x *EmployeeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EmployeeRequest.ProtoReflect.Descriptor instead.
 func (*EmployeeRequest) Descriptor() ([]byte, []int) {
-	return file_employees_proto_rawDescGZIP(), []int{4}
+	return file_employees_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *EmployeeRequest) GetEmployee() *Employee {
@@ -346,7 +441,7 @@ type EmployeeResponse struct {
 func (x *EmployeeResponse) Reset() {
 	*x = EmployeeResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_employees_proto_msgTypes[5]
+		mi := &file_employees_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -359,7 +454,7 @@ func (x *EmployeeResponse) String() string {
 func (*EmployeeResponse) ProtoMessage() {}
 
 func (x *EmployeeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_employees_proto_msgTypes[5]
+	mi := &file_employees_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -372,7 +467,7 @@ func (x *EmployeeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EmployeeResponse.ProtoReflect.Descriptor instead.
 func (*EmployeeResponse) Descriptor() ([]byte, []int) {
-	return file_employees_proto_rawDescGZIP(), []int{5}
+	return file_employees_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *EmployeeResponse) GetEmployee() *Employee {
@@ -382,63 +477,18 @@ func (x *EmployeeResponse) GetEmployee() *Employee {
 	return nil
 }
 
-type AddAttachmentRequest struct {
+type AttachmentRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Data []byte `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
+	UserID   string `protobuf:"bytes,1,opt,name=userID,proto3" json:"userID,omitempty"`
+	Filename string `protobuf:"bytes,2,opt,name=filename,proto3" json:"filename,omitempty"`
+	Data     []byte `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
 }
 
-func (x *AddAttachmentRequest) Reset() {
-	*x = AddAttachmentRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_employees_proto_msgTypes[6]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *AddAttachmentRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AddAttachmentRequest) ProtoMessage() {}
-
-func (x *AddAttachmentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_employees_proto_msgTypes[6]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AddAttachmentRequest.ProtoReflect.Descriptor instead.
-func (*AddAttachmentRequest) Descriptor() ([]byte, []int) {
-	return file_employees_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *AddAttachmentRequest) GetData() []byte {
-	if x != nil {
-		return x.Data
-	}
-	return nil
-}
-
-type AddAttachmentResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	IsOk bool `protobuf:"varint,1,opt,name=isOk,proto3" json:"isOk,omitempty"`
-}
-
-func (x *AddAttachmentResponse) Reset() {
-	*x = AddAttachmentResponse{}
+func (x *AttachmentRequest) Reset() {
+	*x = AttachmentRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_employees_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -446,13 +496,13 @@ func (x *AddAttachmentResponse) Reset() {
 	}
 }
 
-func (x *AddAttachmentResponse) String() string {
+func (x *AttachmentRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*AddAttachmentResponse) ProtoMessage() {}
+func (*AttachmentRequest) ProtoMessage() {}
 
-func (x *AddAttachmentResponse) ProtoReflect() protoreflect.Message {
+func (x *AttachmentRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_employees_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -464,84 +514,117 @@ func (x *AddAttachmentResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use AddAttachmentResponse.ProtoReflect.Descriptor instead.
-func (*AddAttachmentResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use AttachmentRequest.ProtoReflect.Descriptor instead.
+func (*AttachmentRequest) Descriptor() ([]byte, []int) {
 	return file_employees_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *AddAttachmentResponse) GetIsOk() bool {
+func (x *AttachmentRequest) GetUserID() string {
 	if x != nil {
-		return x.IsOk
+		return x.UserID
 	}
-	return false
+	return ""
+}
+
+func (x *AttachmentRequest) GetFilename() string {
+	if x != nil {
+		return x.Filename
+	}
+	return ""
+}
+
+func (x *AttachmentRequest) GetData() []byte {
+	if x != nil {
+		return x.Data
+	}
+	return nil
 }
 
 var File_employees_proto protoreflect.FileDescriptor
 
 var file_employees_proto_rawDesc = []byte{
 	0x0a, 0x0f, 0x65, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x22, 0x99, 0x02, 0x0a, 0x08, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x12, 0x0e,
-	0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x02, 0x69, 0x64, 0x12, 0x20,
+	0x6f, 0x22, 0xbb, 0x02, 0x0a, 0x08, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x12, 0x0e,
+	0x0a, 0x02, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x49, 0x44, 0x12, 0x20,
 	0x0a, 0x0b, 0x62, 0x61, 0x64, 0x67, 0x65, 0x4e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x18, 0x02, 0x20,
 	0x01, 0x28, 0x05, 0x52, 0x0b, 0x62, 0x61, 0x64, 0x67, 0x65, 0x4e, 0x75, 0x6d, 0x62, 0x65, 0x72,
 	0x12, 0x1c, 0x0a, 0x09, 0x66, 0x69, 0x72, 0x73, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20,
 	0x01, 0x28, 0x09, 0x52, 0x09, 0x66, 0x69, 0x72, 0x73, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x1a,
 	0x0a, 0x08, 0x6c, 0x61, 0x73, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x08, 0x6c, 0x61, 0x73, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x30, 0x0a, 0x13, 0x76, 0x61,
-	0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x41, 0x63, 0x63, 0x72, 0x75, 0x61, 0x6c, 0x52, 0x61, 0x74,
-	0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x02, 0x52, 0x13, 0x76, 0x61, 0x63, 0x61, 0x74, 0x69, 0x6f,
-	0x6e, 0x41, 0x63, 0x63, 0x72, 0x75, 0x61, 0x6c, 0x52, 0x61, 0x74, 0x65, 0x12, 0x28, 0x0a, 0x0f,
-	0x76, 0x61, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x41, 0x63, 0x63, 0x72, 0x75, 0x65, 0x64, 0x18,
-	0x06, 0x20, 0x01, 0x28, 0x02, 0x52, 0x0f, 0x76, 0x61, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x41,
-	0x63, 0x63, 0x72, 0x75, 0x65, 0x64, 0x12, 0x27, 0x0a, 0x09, 0x76, 0x61, 0x63, 0x61, 0x74, 0x69,
-	0x6f, 0x6e, 0x73, 0x18, 0x07, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x09, 0x2e, 0x56, 0x61, 0x63, 0x61,
-	0x74, 0x69, 0x6f, 0x6e, 0x52, 0x09, 0x76, 0x61, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12,
-	0x1c, 0x0a, 0x09, 0x44, 0x6f, 0x63, 0x75, 0x6d, 0x65, 0x6e, 0x74, 0x73, 0x18, 0x08, 0x20, 0x03,
-	0x28, 0x09, 0x52, 0x09, 0x44, 0x6f, 0x63, 0x75, 0x6d, 0x65, 0x6e, 0x74, 0x73, 0x22, 0x76, 0x0a,
-	0x08, 0x56, 0x61, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x02, 0x69, 0x64, 0x12, 0x1c, 0x0a, 0x09, 0x73, 0x74, 0x61,
-	0x72, 0x74, 0x44, 0x61, 0x74, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x73, 0x74,
-	0x61, 0x72, 0x74, 0x44, 0x61, 0x74, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x64, 0x75, 0x72, 0x61, 0x74,
-	0x69, 0x6f, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x02, 0x52, 0x08, 0x64, 0x75, 0x72, 0x61, 0x74,
-	0x69, 0x6f, 0x6e, 0x12, 0x20, 0x0a, 0x0b, 0x69, 0x73, 0x43, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x6c,
-	0x65, 0x64, 0x18, 0x04, 0x20, 0x01, 0x28, 0x08, 0x52, 0x0b, 0x69, 0x73, 0x43, 0x61, 0x6e, 0x63,
-	0x65, 0x6c, 0x6c, 0x65, 0x64, 0x22, 0x0f, 0x0a, 0x0d, 0x47, 0x65, 0x74, 0x41, 0x6c, 0x6c, 0x52,
-	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x3b, 0x0a, 0x17, 0x47, 0x65, 0x74, 0x42, 0x79, 0x42,
-	0x61, 0x64, 0x67, 0x65, 0x4e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x12, 0x20, 0x0a, 0x0b, 0x62, 0x61, 0x64, 0x67, 0x65, 0x4e, 0x75, 0x6d, 0x62, 0x65, 0x72,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0b, 0x62, 0x61, 0x64, 0x67, 0x65, 0x4e, 0x75, 0x6d,
-	0x62, 0x65, 0x72, 0x22, 0x38, 0x0a, 0x0f, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x52,
-	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x25, 0x0a, 0x08, 0x65, 0x6d, 0x70, 0x6c, 0x6f, 0x79,
-	0x65, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x09, 0x2e, 0x45, 0x6d, 0x70, 0x6c, 0x6f,
-	0x79, 0x65, 0x65, 0x52, 0x08, 0x65, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x22, 0x39, 0x0a,
-	0x10, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
-	0x65, 0x12, 0x25, 0x0a, 0x08, 0x65, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x0b, 0x32, 0x09, 0x2e, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x52, 0x08,
-	0x65, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x22, 0x2a, 0x0a, 0x14, 0x41, 0x64, 0x64, 0x41,
-	0x74, 0x74, 0x61, 0x63, 0x68, 0x6d, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x12, 0x12, 0x0a, 0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x04,
-	0x64, 0x61, 0x74, 0x61, 0x22, 0x2b, 0x0a, 0x15, 0x41, 0x64, 0x64, 0x41, 0x74, 0x74, 0x61, 0x63,
-	0x68, 0x6d, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x12, 0x0a,
-	0x04, 0x69, 0x73, 0x4f, 0x6b, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x52, 0x04, 0x69, 0x73, 0x4f,
-	0x6b, 0x32, 0xac, 0x02, 0x0a, 0x0f, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x53, 0x65,
-	0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x3f, 0x0a, 0x10, 0x47, 0x65, 0x74, 0x42, 0x79, 0x42, 0x61,
-	0x64, 0x67, 0x65, 0x4e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x12, 0x18, 0x2e, 0x47, 0x65, 0x74, 0x42,
-	0x79, 0x42, 0x61, 0x64, 0x67, 0x65, 0x4e, 0x75, 0x6d, 0x62, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x1a, 0x11, 0x2e, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x2b, 0x0a, 0x04, 0x53, 0x61, 0x76, 0x65, 0x12, 0x10,
-	0x2e, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x1a, 0x11, 0x2e, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x12, 0x48, 0x0a, 0x15, 0x41, 0x64, 0x64, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79,
-	0x65, 0x65, 0x41, 0x74, 0x74, 0x61, 0x63, 0x68, 0x6d, 0x65, 0x6e, 0x74, 0x12, 0x15, 0x2e, 0x41,
-	0x64, 0x64, 0x41, 0x74, 0x74, 0x61, 0x63, 0x68, 0x6d, 0x65, 0x6e, 0x74, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x41, 0x64, 0x64, 0x41, 0x74, 0x74, 0x61, 0x63, 0x68, 0x6d,
-	0x65, 0x6e, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x28, 0x01, 0x12, 0x2d, 0x0a,
-	0x06, 0x47, 0x65, 0x74, 0x41, 0x6c, 0x6c, 0x12, 0x0e, 0x2e, 0x47, 0x65, 0x74, 0x41, 0x6c, 0x6c,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x11, 0x2e, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79,
-	0x65, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x30, 0x01, 0x12, 0x32, 0x0a, 0x07,
-	0x53, 0x61, 0x76, 0x65, 0x41, 0x6c, 0x6c, 0x12, 0x10, 0x2e, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79,
+	0x52, 0x08, 0x6c, 0x61, 0x73, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x20, 0x0a, 0x0b, 0x63, 0x6f,
+	0x75, 0x6e, 0x74, 0x72, 0x79, 0x43, 0x6f, 0x64, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x0b, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x72, 0x79, 0x43, 0x6f, 0x64, 0x65, 0x12, 0x30, 0x0a, 0x13,
+	0x76, 0x61, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x41, 0x63, 0x63, 0x72, 0x75, 0x61, 0x6c, 0x52,
+	0x61, 0x74, 0x65, 0x18, 0x06, 0x20, 0x01, 0x28, 0x02, 0x52, 0x13, 0x76, 0x61, 0x63, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x41, 0x63, 0x63, 0x72, 0x75, 0x61, 0x6c, 0x52, 0x61, 0x74, 0x65, 0x12, 0x28,
+	0x0a, 0x0f, 0x76, 0x61, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x41, 0x63, 0x63, 0x72, 0x75, 0x65,
+	0x64, 0x18, 0x07, 0x20, 0x01, 0x28, 0x02, 0x52, 0x0f, 0x76, 0x61, 0x63, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x41, 0x63, 0x63, 0x72, 0x75, 0x65, 0x64, 0x12, 0x27, 0x0a, 0x09, 0x76, 0x61, 0x63, 0x61,
+	0x74, 0x69, 0x6f, 0x6e, 0x73, 0x18, 0x08, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x09, 0x2e, 0x56, 0x61,
+	0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x09, 0x76, 0x61, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e,
+	0x73, 0x12, 0x1c, 0x0a, 0x09, 0x64, 0x6f, 0x63, 0x75, 0x6d, 0x65, 0x6e, 0x74, 0x73, 0x18, 0x09,
+	0x20, 0x03, 0x28, 0x09, 0x52, 0x09, 0x64, 0x6f, 0x63, 0x75, 0x6d, 0x65, 0x6e, 0x74, 0x73, 0x22,
+	0x98, 0x01, 0x0a, 0x08, 0x56, 0x61, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x0e, 0x0a, 0x02,
+	0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x49, 0x44, 0x12, 0x1c, 0x0a, 0x09,
+	0x73, 0x74, 0x61, 0x72, 0x74, 0x44, 0x61, 0x74, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52,
+	0x09, 0x73, 0x74, 0x61, 0x72, 0x74, 0x44, 0x61, 0x74, 0x65, 0x12, 0x24, 0x0a, 0x0d, 0x64, 0x75,
+	0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x48, 0x6f, 0x75, 0x72, 0x73, 0x18, 0x03, 0x20, 0x01, 0x28,
+	0x02, 0x52, 0x0d, 0x64, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x48, 0x6f, 0x75, 0x72, 0x73,
+	0x12, 0x1a, 0x0a, 0x08, 0x61, 0x70, 0x70, 0x72, 0x6f, 0x76, 0x65, 0x64, 0x18, 0x04, 0x20, 0x01,
+	0x28, 0x08, 0x52, 0x08, 0x61, 0x70, 0x70, 0x72, 0x6f, 0x76, 0x65, 0x64, 0x12, 0x1c, 0x0a, 0x09,
+	0x63, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x6c, 0x65, 0x64, 0x18, 0x05, 0x20, 0x01, 0x28, 0x08, 0x52,
+	0x09, 0x63, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x6c, 0x65, 0x64, 0x22, 0x82, 0x01, 0x0a, 0x0a, 0x41,
+	0x74, 0x74, 0x61, 0x63, 0x68, 0x6d, 0x65, 0x6e, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x49, 0x44, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x49, 0x44, 0x12, 0x16, 0x0a, 0x06, 0x75, 0x73, 0x65,
+	0x72, 0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49,
+	0x44, 0x12, 0x1a, 0x0a, 0x08, 0x66, 0x69, 0x6c, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x08, 0x66, 0x69, 0x6c, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x12, 0x0a,
+	0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x04, 0x64, 0x61, 0x74,
+	0x61, 0x12, 0x1c, 0x0a, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x18, 0x05,
+	0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x22,
+	0x0f, 0x0a, 0x0d, 0x47, 0x65, 0x74, 0x41, 0x6c, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x22, 0x1d, 0x0a, 0x0b, 0x42, 0x79, 0x49, 0x44, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x0e, 0x0a, 0x02, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x49, 0x44, 0x22,
+	0x38, 0x0a, 0x0f, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x12, 0x25, 0x0a, 0x08, 0x65, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x09, 0x2e, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x52,
+	0x08, 0x65, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x22, 0x39, 0x0a, 0x10, 0x45, 0x6d, 0x70,
+	0x6c, 0x6f, 0x79, 0x65, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x25, 0x0a,
+	0x08, 0x65, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x09, 0x2e, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x52, 0x08, 0x65, 0x6d, 0x70, 0x6c,
+	0x6f, 0x79, 0x65, 0x65, 0x22, 0x5b, 0x0a, 0x11, 0x41, 0x74, 0x74, 0x61, 0x63, 0x68, 0x6d, 0x65,
+	0x6e, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x75, 0x73, 0x65,
+	0x72, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49,
+	0x44, 0x12, 0x1a, 0x0a, 0x08, 0x66, 0x69, 0x6c, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x08, 0x66, 0x69, 0x6c, 0x65, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x12, 0x0a,
+	0x04, 0x64, 0x61, 0x74, 0x61, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x04, 0x64, 0x61, 0x74,
+	0x61, 0x32, 0xac, 0x03, 0x0a, 0x0f, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x53, 0x65,
+	0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x30, 0x0a, 0x09, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65,
+	0x65, 0x73, 0x12, 0x0e, 0x2e, 0x47, 0x65, 0x74, 0x41, 0x6c, 0x6c, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x1a, 0x11, 0x2e, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x30, 0x01, 0x12, 0x2f, 0x0a, 0x0c, 0x45, 0x6d, 0x70, 0x6c, 0x6f,
+	0x79, 0x65, 0x65, 0x42, 0x79, 0x49, 0x44, 0x12, 0x0c, 0x2e, 0x42, 0x79, 0x49, 0x44, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x11, 0x2e, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x32, 0x0a, 0x0b, 0x41, 0x64, 0x64, 0x45,
+	0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x12, 0x10, 0x2e, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79,
 	0x65, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x11, 0x2e, 0x45, 0x6d, 0x70, 0x6c,
-	0x6f, 0x79, 0x65, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x28, 0x01, 0x30, 0x01,
+	0x6f, 0x79, 0x65, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x37, 0x0a, 0x0c,
+	0x41, 0x64, 0x64, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x73, 0x12, 0x10, 0x2e, 0x45,
+	0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x11,
+	0x2e, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x28, 0x01, 0x30, 0x01, 0x12, 0x32, 0x0a, 0x0d, 0x41, 0x64, 0x64, 0x41, 0x74, 0x74, 0x61,
+	0x63, 0x68, 0x6d, 0x65, 0x6e, 0x74, 0x12, 0x12, 0x2e, 0x41, 0x74, 0x74, 0x61, 0x63, 0x68, 0x6d,
+	0x65, 0x6e, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0b, 0x2e, 0x41, 0x74, 0x74,
+	0x61, 0x63, 0x68, 0x6d, 0x65, 0x6e, 0x74, 0x28, 0x01, 0x12, 0x2b, 0x0a, 0x0e, 0x41, 0x74, 0x74,
+	0x61, 0x63, 0x68, 0x6d, 0x65, 0x6e, 0x74, 0x42, 0x79, 0x49, 0x44, 0x12, 0x0c, 0x2e, 0x42, 0x79,
+	0x49, 0x44, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0b, 0x2e, 0x41, 0x74, 0x74, 0x61,
+	0x63, 0x68, 0x6d, 0x65, 0x6e, 0x74, 0x12, 0x31, 0x0a, 0x0e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65,
+	0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x12, 0x0c, 0x2e, 0x42, 0x79, 0x49, 0x44, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x11, 0x2e, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65,
+	0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x35, 0x0a, 0x0e, 0x55, 0x70, 0x64,
+	0x61, 0x74, 0x65, 0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x12, 0x10, 0x2e, 0x45, 0x6d,
+	0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x11, 0x2e,
+	0x45, 0x6d, 0x70, 0x6c, 0x6f, 0x79, 0x65, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
 	0x42, 0x0d, 0x5a, 0x0b, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x3b, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
 	0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
@@ -560,34 +643,40 @@ func file_employees_proto_rawDescGZIP() []byte {
 
 var file_employees_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_employees_proto_goTypes = []interface{}{
-	(*Employee)(nil),                // 0: Employee
-	(*Vacation)(nil),                // 1: Vacation
-	(*GetAllRequest)(nil),           // 2: GetAllRequest
-	(*GetByBadgeNumberRequest)(nil), // 3: GetByBadgeNumberRequest
-	(*EmployeeRequest)(nil),         // 4: EmployeeRequest
-	(*EmployeeResponse)(nil),        // 5: EmployeeResponse
-	(*AddAttachmentRequest)(nil),    // 6: AddAttachmentRequest
-	(*AddAttachmentResponse)(nil),   // 7: AddAttachmentResponse
+	(*Employee)(nil),          // 0: Employee
+	(*Vacation)(nil),          // 1: Vacation
+	(*Attachment)(nil),        // 2: Attachment
+	(*GetAllRequest)(nil),     // 3: GetAllRequest
+	(*ByIDRequest)(nil),       // 4: ByIDRequest
+	(*EmployeeRequest)(nil),   // 5: EmployeeRequest
+	(*EmployeeResponse)(nil),  // 6: EmployeeResponse
+	(*AttachmentRequest)(nil), // 7: AttachmentRequest
 }
 var file_employees_proto_depIdxs = []int32{
-	1, // 0: Employee.vacations:type_name -> Vacation
-	0, // 1: EmployeeRequest.employee:type_name -> Employee
-	0, // 2: EmployeeResponse.employee:type_name -> Employee
-	3, // 3: EmployeeService.GetByBadgeNumber:input_type -> GetByBadgeNumberRequest
-	4, // 4: EmployeeService.Save:input_type -> EmployeeRequest
-	6, // 5: EmployeeService.AddEmployeeAttachment:input_type -> AddAttachmentRequest
-	2, // 6: EmployeeService.GetAll:input_type -> GetAllRequest
-	4, // 7: EmployeeService.SaveAll:input_type -> EmployeeRequest
-	5, // 8: EmployeeService.GetByBadgeNumber:output_type -> EmployeeResponse
-	5, // 9: EmployeeService.Save:output_type -> EmployeeResponse
-	7, // 10: EmployeeService.AddEmployeeAttachment:output_type -> AddAttachmentResponse
-	5, // 11: EmployeeService.GetAll:output_type -> EmployeeResponse
-	5, // 12: EmployeeService.SaveAll:output_type -> EmployeeResponse
-	8, // [8:13] is the sub-list for method output_type
-	3, // [3:8] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	1,  // 0: Employee.vacations:type_name -> Vacation
+	0,  // 1: EmployeeRequest.employee:type_name -> Employee
+	0,  // 2: EmployeeResponse.employee:type_name -> Employee
+	3,  // 3: EmployeeService.Employees:input_type -> GetAllRequest
+	4,  // 4: EmployeeService.EmployeeByID:input_type -> ByIDRequest
+	5,  // 5: EmployeeService.AddEmployee:input_type -> EmployeeRequest
+	5,  // 6: EmployeeService.AddEmployees:input_type -> EmployeeRequest
+	7,  // 7: EmployeeService.AddAttachment:input_type -> AttachmentRequest
+	4,  // 8: EmployeeService.AttachmentByID:input_type -> ByIDRequest
+	4,  // 9: EmployeeService.DeleteEmployee:input_type -> ByIDRequest
+	5,  // 10: EmployeeService.UpdateEmployee:input_type -> EmployeeRequest
+	6,  // 11: EmployeeService.Employees:output_type -> EmployeeResponse
+	6,  // 12: EmployeeService.EmployeeByID:output_type -> EmployeeResponse
+	6,  // 13: EmployeeService.AddEmployee:output_type -> EmployeeResponse
+	6,  // 14: EmployeeService.AddEmployees:output_type -> EmployeeResponse
+	2,  // 15: EmployeeService.AddAttachment:output_type -> Attachment
+	2,  // 16: EmployeeService.AttachmentByID:output_type -> Attachment
+	6,  // 17: EmployeeService.DeleteEmployee:output_type -> EmployeeResponse
+	6,  // 18: EmployeeService.UpdateEmployee:output_type -> EmployeeResponse
+	11, // [11:19] is the sub-list for method output_type
+	3,  // [3:11] is the sub-list for method input_type
+	3,  // [3:3] is the sub-list for extension type_name
+	3,  // [3:3] is the sub-list for extension extendee
+	0,  // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_employees_proto_init() }
@@ -621,7 +710,7 @@ func file_employees_proto_init() {
 			}
 		}
 		file_employees_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetAllRequest); i {
+			switch v := v.(*Attachment); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -633,7 +722,7 @@ func file_employees_proto_init() {
 			}
 		}
 		file_employees_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetByBadgeNumberRequest); i {
+			switch v := v.(*GetAllRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -645,7 +734,7 @@ func file_employees_proto_init() {
 			}
 		}
 		file_employees_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*EmployeeRequest); i {
+			switch v := v.(*ByIDRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -657,7 +746,7 @@ func file_employees_proto_init() {
 			}
 		}
 		file_employees_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*EmployeeResponse); i {
+			switch v := v.(*EmployeeRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -669,7 +758,7 @@ func file_employees_proto_init() {
 			}
 		}
 		file_employees_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AddAttachmentRequest); i {
+			switch v := v.(*EmployeeResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -681,7 +770,7 @@ func file_employees_proto_init() {
 			}
 		}
 		file_employees_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AddAttachmentResponse); i {
+			switch v := v.(*AttachmentRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -725,15 +814,17 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type EmployeeServiceClient interface {
-	// Unary
-	GetByBadgeNumber(ctx context.Context, in *GetByBadgeNumberRequest, opts ...grpc.CallOption) (*EmployeeResponse, error)
-	Save(ctx context.Context, in *EmployeeRequest, opts ...grpc.CallOption) (*EmployeeResponse, error)
-	// Client streaming
-	AddEmployeeAttachment(ctx context.Context, opts ...grpc.CallOption) (EmployeeService_AddEmployeeAttachmentClient, error)
-	// Server streaming
-	GetAll(ctx context.Context, in *GetAllRequest, opts ...grpc.CallOption) (EmployeeService_GetAllClient, error)
-	// Bidirectional streaming
-	SaveAll(ctx context.Context, opts ...grpc.CallOption) (EmployeeService_SaveAllClient, error)
+	// Server streaming:
+	Employees(ctx context.Context, in *GetAllRequest, opts ...grpc.CallOption) (EmployeeService_EmployeesClient, error)
+	EmployeeByID(ctx context.Context, in *ByIDRequest, opts ...grpc.CallOption) (*EmployeeResponse, error)
+	AddEmployee(ctx context.Context, in *EmployeeRequest, opts ...grpc.CallOption) (*EmployeeResponse, error)
+	// Bidirectional streaming:
+	AddEmployees(ctx context.Context, opts ...grpc.CallOption) (EmployeeService_AddEmployeesClient, error)
+	// Client streaming:
+	AddAttachment(ctx context.Context, opts ...grpc.CallOption) (EmployeeService_AddAttachmentClient, error)
+	AttachmentByID(ctx context.Context, in *ByIDRequest, opts ...grpc.CallOption) (*Attachment, error)
+	DeleteEmployee(ctx context.Context, in *ByIDRequest, opts ...grpc.CallOption) (*EmployeeResponse, error)
+	UpdateEmployee(ctx context.Context, in *EmployeeRequest, opts ...grpc.CallOption) (*EmployeeResponse, error)
 }
 
 type employeeServiceClient struct {
@@ -744,64 +835,12 @@ func NewEmployeeServiceClient(cc grpc.ClientConnInterface) EmployeeServiceClient
 	return &employeeServiceClient{cc}
 }
 
-func (c *employeeServiceClient) GetByBadgeNumber(ctx context.Context, in *GetByBadgeNumberRequest, opts ...grpc.CallOption) (*EmployeeResponse, error) {
-	out := new(EmployeeResponse)
-	err := c.cc.Invoke(ctx, "/EmployeeService/GetByBadgeNumber", in, out, opts...)
+func (c *employeeServiceClient) Employees(ctx context.Context, in *GetAllRequest, opts ...grpc.CallOption) (EmployeeService_EmployeesClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_EmployeeService_serviceDesc.Streams[0], "/EmployeeService/Employees", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
-}
-
-func (c *employeeServiceClient) Save(ctx context.Context, in *EmployeeRequest, opts ...grpc.CallOption) (*EmployeeResponse, error) {
-	out := new(EmployeeResponse)
-	err := c.cc.Invoke(ctx, "/EmployeeService/Save", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *employeeServiceClient) AddEmployeeAttachment(ctx context.Context, opts ...grpc.CallOption) (EmployeeService_AddEmployeeAttachmentClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_EmployeeService_serviceDesc.Streams[0], "/EmployeeService/AddEmployeeAttachment", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &employeeServiceAddEmployeeAttachmentClient{stream}
-	return x, nil
-}
-
-type EmployeeService_AddEmployeeAttachmentClient interface {
-	Send(*AddAttachmentRequest) error
-	CloseAndRecv() (*AddAttachmentResponse, error)
-	grpc.ClientStream
-}
-
-type employeeServiceAddEmployeeAttachmentClient struct {
-	grpc.ClientStream
-}
-
-func (x *employeeServiceAddEmployeeAttachmentClient) Send(m *AddAttachmentRequest) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *employeeServiceAddEmployeeAttachmentClient) CloseAndRecv() (*AddAttachmentResponse, error) {
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	m := new(AddAttachmentResponse)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *employeeServiceClient) GetAll(ctx context.Context, in *GetAllRequest, opts ...grpc.CallOption) (EmployeeService_GetAllClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_EmployeeService_serviceDesc.Streams[1], "/EmployeeService/GetAll", opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &employeeServiceGetAllClient{stream}
+	x := &employeeServiceEmployeesClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -811,16 +850,16 @@ func (c *employeeServiceClient) GetAll(ctx context.Context, in *GetAllRequest, o
 	return x, nil
 }
 
-type EmployeeService_GetAllClient interface {
+type EmployeeService_EmployeesClient interface {
 	Recv() (*EmployeeResponse, error)
 	grpc.ClientStream
 }
 
-type employeeServiceGetAllClient struct {
+type employeeServiceEmployeesClient struct {
 	grpc.ClientStream
 }
 
-func (x *employeeServiceGetAllClient) Recv() (*EmployeeResponse, error) {
+func (x *employeeServiceEmployeesClient) Recv() (*EmployeeResponse, error) {
 	m := new(EmployeeResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -828,30 +867,48 @@ func (x *employeeServiceGetAllClient) Recv() (*EmployeeResponse, error) {
 	return m, nil
 }
 
-func (c *employeeServiceClient) SaveAll(ctx context.Context, opts ...grpc.CallOption) (EmployeeService_SaveAllClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_EmployeeService_serviceDesc.Streams[2], "/EmployeeService/SaveAll", opts...)
+func (c *employeeServiceClient) EmployeeByID(ctx context.Context, in *ByIDRequest, opts ...grpc.CallOption) (*EmployeeResponse, error) {
+	out := new(EmployeeResponse)
+	err := c.cc.Invoke(ctx, "/EmployeeService/EmployeeByID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &employeeServiceSaveAllClient{stream}
+	return out, nil
+}
+
+func (c *employeeServiceClient) AddEmployee(ctx context.Context, in *EmployeeRequest, opts ...grpc.CallOption) (*EmployeeResponse, error) {
+	out := new(EmployeeResponse)
+	err := c.cc.Invoke(ctx, "/EmployeeService/AddEmployee", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *employeeServiceClient) AddEmployees(ctx context.Context, opts ...grpc.CallOption) (EmployeeService_AddEmployeesClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_EmployeeService_serviceDesc.Streams[1], "/EmployeeService/AddEmployees", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &employeeServiceAddEmployeesClient{stream}
 	return x, nil
 }
 
-type EmployeeService_SaveAllClient interface {
+type EmployeeService_AddEmployeesClient interface {
 	Send(*EmployeeRequest) error
 	Recv() (*EmployeeResponse, error)
 	grpc.ClientStream
 }
 
-type employeeServiceSaveAllClient struct {
+type employeeServiceAddEmployeesClient struct {
 	grpc.ClientStream
 }
 
-func (x *employeeServiceSaveAllClient) Send(m *EmployeeRequest) error {
+func (x *employeeServiceAddEmployeesClient) Send(m *EmployeeRequest) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *employeeServiceSaveAllClient) Recv() (*EmployeeResponse, error) {
+func (x *employeeServiceAddEmployeesClient) Recv() (*EmployeeResponse, error) {
 	m := new(EmployeeResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -859,145 +916,191 @@ func (x *employeeServiceSaveAllClient) Recv() (*EmployeeResponse, error) {
 	return m, nil
 }
 
+func (c *employeeServiceClient) AddAttachment(ctx context.Context, opts ...grpc.CallOption) (EmployeeService_AddAttachmentClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_EmployeeService_serviceDesc.Streams[2], "/EmployeeService/AddAttachment", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &employeeServiceAddAttachmentClient{stream}
+	return x, nil
+}
+
+type EmployeeService_AddAttachmentClient interface {
+	Send(*AttachmentRequest) error
+	CloseAndRecv() (*Attachment, error)
+	grpc.ClientStream
+}
+
+type employeeServiceAddAttachmentClient struct {
+	grpc.ClientStream
+}
+
+func (x *employeeServiceAddAttachmentClient) Send(m *AttachmentRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *employeeServiceAddAttachmentClient) CloseAndRecv() (*Attachment, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(Attachment)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *employeeServiceClient) AttachmentByID(ctx context.Context, in *ByIDRequest, opts ...grpc.CallOption) (*Attachment, error) {
+	out := new(Attachment)
+	err := c.cc.Invoke(ctx, "/EmployeeService/AttachmentByID", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *employeeServiceClient) DeleteEmployee(ctx context.Context, in *ByIDRequest, opts ...grpc.CallOption) (*EmployeeResponse, error) {
+	out := new(EmployeeResponse)
+	err := c.cc.Invoke(ctx, "/EmployeeService/DeleteEmployee", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *employeeServiceClient) UpdateEmployee(ctx context.Context, in *EmployeeRequest, opts ...grpc.CallOption) (*EmployeeResponse, error) {
+	out := new(EmployeeResponse)
+	err := c.cc.Invoke(ctx, "/EmployeeService/UpdateEmployee", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EmployeeServiceServer is the server API for EmployeeService service.
 type EmployeeServiceServer interface {
-	// Unary
-	GetByBadgeNumber(context.Context, *GetByBadgeNumberRequest) (*EmployeeResponse, error)
-	Save(context.Context, *EmployeeRequest) (*EmployeeResponse, error)
-	// Client streaming
-	AddEmployeeAttachment(EmployeeService_AddEmployeeAttachmentServer) error
-	// Server streaming
-	GetAll(*GetAllRequest, EmployeeService_GetAllServer) error
-	// Bidirectional streaming
-	SaveAll(EmployeeService_SaveAllServer) error
+	// Server streaming:
+	Employees(*GetAllRequest, EmployeeService_EmployeesServer) error
+	EmployeeByID(context.Context, *ByIDRequest) (*EmployeeResponse, error)
+	AddEmployee(context.Context, *EmployeeRequest) (*EmployeeResponse, error)
+	// Bidirectional streaming:
+	AddEmployees(EmployeeService_AddEmployeesServer) error
+	// Client streaming:
+	AddAttachment(EmployeeService_AddAttachmentServer) error
+	AttachmentByID(context.Context, *ByIDRequest) (*Attachment, error)
+	DeleteEmployee(context.Context, *ByIDRequest) (*EmployeeResponse, error)
+	UpdateEmployee(context.Context, *EmployeeRequest) (*EmployeeResponse, error)
 }
 
 // UnimplementedEmployeeServiceServer can be embedded to have forward compatible implementations.
 type UnimplementedEmployeeServiceServer struct {
 }
 
-func (*UnimplementedEmployeeServiceServer) GetByBadgeNumber(context.Context, *GetByBadgeNumberRequest) (*EmployeeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetByBadgeNumber not implemented")
+func (*UnimplementedEmployeeServiceServer) Employees(*GetAllRequest, EmployeeService_EmployeesServer) error {
+	return status.Errorf(codes.Unimplemented, "method Employees not implemented")
 }
-func (*UnimplementedEmployeeServiceServer) Save(context.Context, *EmployeeRequest) (*EmployeeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Save not implemented")
+func (*UnimplementedEmployeeServiceServer) EmployeeByID(context.Context, *ByIDRequest) (*EmployeeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EmployeeByID not implemented")
 }
-func (*UnimplementedEmployeeServiceServer) AddEmployeeAttachment(EmployeeService_AddEmployeeAttachmentServer) error {
-	return status.Errorf(codes.Unimplemented, "method AddEmployeeAttachment not implemented")
+func (*UnimplementedEmployeeServiceServer) AddEmployee(context.Context, *EmployeeRequest) (*EmployeeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddEmployee not implemented")
 }
-func (*UnimplementedEmployeeServiceServer) GetAll(*GetAllRequest, EmployeeService_GetAllServer) error {
-	return status.Errorf(codes.Unimplemented, "method GetAll not implemented")
+func (*UnimplementedEmployeeServiceServer) AddEmployees(EmployeeService_AddEmployeesServer) error {
+	return status.Errorf(codes.Unimplemented, "method AddEmployees not implemented")
 }
-func (*UnimplementedEmployeeServiceServer) SaveAll(EmployeeService_SaveAllServer) error {
-	return status.Errorf(codes.Unimplemented, "method SaveAll not implemented")
+func (*UnimplementedEmployeeServiceServer) AddAttachment(EmployeeService_AddAttachmentServer) error {
+	return status.Errorf(codes.Unimplemented, "method AddAttachment not implemented")
+}
+func (*UnimplementedEmployeeServiceServer) AttachmentByID(context.Context, *ByIDRequest) (*Attachment, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AttachmentByID not implemented")
+}
+func (*UnimplementedEmployeeServiceServer) DeleteEmployee(context.Context, *ByIDRequest) (*EmployeeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteEmployee not implemented")
+}
+func (*UnimplementedEmployeeServiceServer) UpdateEmployee(context.Context, *EmployeeRequest) (*EmployeeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateEmployee not implemented")
 }
 
 func RegisterEmployeeServiceServer(s *grpc.Server, srv EmployeeServiceServer) {
 	s.RegisterService(&_EmployeeService_serviceDesc, srv)
 }
 
-func _EmployeeService_GetByBadgeNumber_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetByBadgeNumberRequest)
+func _EmployeeService_Employees_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetAllRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(EmployeeServiceServer).Employees(m, &employeeServiceEmployeesServer{stream})
+}
+
+type EmployeeService_EmployeesServer interface {
+	Send(*EmployeeResponse) error
+	grpc.ServerStream
+}
+
+type employeeServiceEmployeesServer struct {
+	grpc.ServerStream
+}
+
+func (x *employeeServiceEmployeesServer) Send(m *EmployeeResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _EmployeeService_EmployeeByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ByIDRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(EmployeeServiceServer).GetByBadgeNumber(ctx, in)
+		return srv.(EmployeeServiceServer).EmployeeByID(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/EmployeeService/GetByBadgeNumber",
+		FullMethod: "/EmployeeService/EmployeeByID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EmployeeServiceServer).GetByBadgeNumber(ctx, req.(*GetByBadgeNumberRequest))
+		return srv.(EmployeeServiceServer).EmployeeByID(ctx, req.(*ByIDRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _EmployeeService_Save_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _EmployeeService_AddEmployee_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(EmployeeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(EmployeeServiceServer).Save(ctx, in)
+		return srv.(EmployeeServiceServer).AddEmployee(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/EmployeeService/Save",
+		FullMethod: "/EmployeeService/AddEmployee",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EmployeeServiceServer).Save(ctx, req.(*EmployeeRequest))
+		return srv.(EmployeeServiceServer).AddEmployee(ctx, req.(*EmployeeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _EmployeeService_AddEmployeeAttachment_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(EmployeeServiceServer).AddEmployeeAttachment(&employeeServiceAddEmployeeAttachmentServer{stream})
+func _EmployeeService_AddEmployees_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(EmployeeServiceServer).AddEmployees(&employeeServiceAddEmployeesServer{stream})
 }
 
-type EmployeeService_AddEmployeeAttachmentServer interface {
-	SendAndClose(*AddAttachmentResponse) error
-	Recv() (*AddAttachmentRequest, error)
-	grpc.ServerStream
-}
-
-type employeeServiceAddEmployeeAttachmentServer struct {
-	grpc.ServerStream
-}
-
-func (x *employeeServiceAddEmployeeAttachmentServer) SendAndClose(m *AddAttachmentResponse) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *employeeServiceAddEmployeeAttachmentServer) Recv() (*AddAttachmentRequest, error) {
-	m := new(AddAttachmentRequest)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func _EmployeeService_GetAll_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(GetAllRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(EmployeeServiceServer).GetAll(m, &employeeServiceGetAllServer{stream})
-}
-
-type EmployeeService_GetAllServer interface {
-	Send(*EmployeeResponse) error
-	grpc.ServerStream
-}
-
-type employeeServiceGetAllServer struct {
-	grpc.ServerStream
-}
-
-func (x *employeeServiceGetAllServer) Send(m *EmployeeResponse) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func _EmployeeService_SaveAll_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(EmployeeServiceServer).SaveAll(&employeeServiceSaveAllServer{stream})
-}
-
-type EmployeeService_SaveAllServer interface {
+type EmployeeService_AddEmployeesServer interface {
 	Send(*EmployeeResponse) error
 	Recv() (*EmployeeRequest, error)
 	grpc.ServerStream
 }
 
-type employeeServiceSaveAllServer struct {
+type employeeServiceAddEmployeesServer struct {
 	grpc.ServerStream
 }
 
-func (x *employeeServiceSaveAllServer) Send(m *EmployeeResponse) error {
+func (x *employeeServiceAddEmployeesServer) Send(m *EmployeeResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *employeeServiceSaveAllServer) Recv() (*EmployeeRequest, error) {
+func (x *employeeServiceAddEmployeesServer) Recv() (*EmployeeRequest, error) {
 	m := new(EmployeeRequest)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -1005,34 +1108,126 @@ func (x *employeeServiceSaveAllServer) Recv() (*EmployeeRequest, error) {
 	return m, nil
 }
 
+func _EmployeeService_AddAttachment_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(EmployeeServiceServer).AddAttachment(&employeeServiceAddAttachmentServer{stream})
+}
+
+type EmployeeService_AddAttachmentServer interface {
+	SendAndClose(*Attachment) error
+	Recv() (*AttachmentRequest, error)
+	grpc.ServerStream
+}
+
+type employeeServiceAddAttachmentServer struct {
+	grpc.ServerStream
+}
+
+func (x *employeeServiceAddAttachmentServer) SendAndClose(m *Attachment) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *employeeServiceAddAttachmentServer) Recv() (*AttachmentRequest, error) {
+	m := new(AttachmentRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _EmployeeService_AttachmentByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ByIDRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EmployeeServiceServer).AttachmentByID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/EmployeeService/AttachmentByID",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EmployeeServiceServer).AttachmentByID(ctx, req.(*ByIDRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _EmployeeService_DeleteEmployee_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ByIDRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EmployeeServiceServer).DeleteEmployee(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/EmployeeService/DeleteEmployee",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EmployeeServiceServer).DeleteEmployee(ctx, req.(*ByIDRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _EmployeeService_UpdateEmployee_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmployeeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EmployeeServiceServer).UpdateEmployee(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/EmployeeService/UpdateEmployee",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EmployeeServiceServer).UpdateEmployee(ctx, req.(*EmployeeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _EmployeeService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "EmployeeService",
 	HandlerType: (*EmployeeServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetByBadgeNumber",
-			Handler:    _EmployeeService_GetByBadgeNumber_Handler,
+			MethodName: "EmployeeByID",
+			Handler:    _EmployeeService_EmployeeByID_Handler,
 		},
 		{
-			MethodName: "Save",
-			Handler:    _EmployeeService_Save_Handler,
+			MethodName: "AddEmployee",
+			Handler:    _EmployeeService_AddEmployee_Handler,
+		},
+		{
+			MethodName: "AttachmentByID",
+			Handler:    _EmployeeService_AttachmentByID_Handler,
+		},
+		{
+			MethodName: "DeleteEmployee",
+			Handler:    _EmployeeService_DeleteEmployee_Handler,
+		},
+		{
+			MethodName: "UpdateEmployee",
+			Handler:    _EmployeeService_UpdateEmployee_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "AddEmployeeAttachment",
-			Handler:       _EmployeeService_AddEmployeeAttachment_Handler,
+			StreamName:    "Employees",
+			Handler:       _EmployeeService_Employees_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "AddEmployees",
+			Handler:       _EmployeeService_AddEmployees_Handler,
+			ServerStreams: true,
 			ClientStreams: true,
 		},
 		{
-			StreamName:    "GetAll",
-			Handler:       _EmployeeService_GetAll_Handler,
-			ServerStreams: true,
-		},
-		{
-			StreamName:    "SaveAll",
-			Handler:       _EmployeeService_SaveAll_Handler,
-			ServerStreams: true,
+			StreamName:    "AddAttachment",
+			Handler:       _EmployeeService_AddAttachment_Handler,
 			ClientStreams: true,
 		},
 	},

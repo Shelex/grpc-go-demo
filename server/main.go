@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"strconv"
 
 	"github.com/Shelex/grpc-go-demo/entities"
 	"github.com/Shelex/grpc-go-demo/proto"
@@ -51,33 +50,12 @@ type employeeService struct {
 	documents  documents.FileStorage
 }
 
-func (e *employeeService) GetByBadgeNumber(ctx context.Context, req *proto.GetByBadgeNumberRequest) (*proto.EmployeeResponse, error) {
-	if md, ok := metadata.FromIncomingContext(ctx); ok {
-		log.Printf("metadata received: %v\n", md)
-	}
-	log.Printf("requested badge num: %d\n", req.BadgeNumber)
-	employee, err := e.repository.GetByBadge(req.BadgeNumber)
-	if err != nil {
-		return nil, err
-	}
-	employeeDocuments, _ := e.documents.GetEmployeeDocuments(req.BadgeNumber)
-
-	employee.Documents = employeeDocuments
-	return &proto.EmployeeResponse{
-		Employee: entities.EmployeeFromStorageToProto(employee),
-	}, nil
-}
-
-func (e *employeeService) GetAll(req *proto.GetAllRequest, stream proto.EmployeeService_GetAllServer) error {
+func (e *employeeService) Employees(req *proto.GetAllRequest, stream proto.EmployeeService_EmployeesServer) error {
 	employees, err := e.repository.GetAll()
 	if err != nil {
 		return err
 	}
 	for _, emp := range employees {
-		employeeDocuments, _ := e.documents.GetEmployeeDocuments(emp.BadgeNumber)
-
-		emp.Documents = employeeDocuments
-
 		if err := stream.Send(&proto.EmployeeResponse{Employee: entities.EmployeeFromStorageToProto(emp)}); err != nil {
 			return err
 		}
@@ -85,50 +63,29 @@ func (e *employeeService) GetAll(req *proto.GetAllRequest, stream proto.Employee
 	return nil
 }
 
-func (e *employeeService) AddEmployeeAttachment(stream proto.EmployeeService_AddEmployeeAttachmentServer) error {
-	md, ok := metadata.FromIncomingContext(stream.Context())
-	var employeeBadge int32
-	if ok {
-		badgeFromContext := md["badgenumber"][0]
-		badgeNum, err := strconv.Atoi(badgeFromContext)
-		if err != nil {
-			return err
-		}
-		employee, err := e.repository.GetByBadge(int32(badgeNum))
-		if err != nil {
-			return err
-		}
-		employeeBadge = employee.BadgeNumber
-		log.Printf("receiving photo for badge num: %d\n", employeeBadge)
+func (e *employeeService) EmployeeByID(ctx context.Context, req *proto.ByIDRequest) (*proto.EmployeeResponse, error) {
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+		log.Printf("metadata received: %v\n", md)
 	}
-	imgData := []byte{}
-	for {
-		data, err := stream.Recv()
-		if err == io.EOF {
-			log.Printf("file received with length: %d\n", len(imgData))
-			if err := e.documents.SaveDocument(employeeBadge, imgData); err != nil {
-				return err
-			}
-			return stream.SendAndClose(&proto.AddAttachmentResponse{IsOk: true})
-		}
-		if err != nil {
-			return err
-		}
-		log.Printf("received %d bytes\n", len(data.Data))
-		imgData = append(imgData, data.Data...)
+	employee, err := e.repository.GetEmployee(req.ID)
+	if err != nil {
+		return nil, err
 	}
+	return &proto.EmployeeResponse{
+		Employee: entities.EmployeeFromStorageToProto(employee),
+	}, nil
 }
 
-func (e *employeeService) Save(ctx context.Context, req *proto.EmployeeRequest) (*proto.EmployeeResponse, error) {
-	if err := e.repository.AddEmployee(entities.EmployeeFromProtoToStorage(req.Employee)); err != nil {
+func (e *employeeService) AddEmployee(ctx context.Context, req *proto.EmployeeRequest) (*proto.EmployeeResponse, error) {
+	employee, err := e.repository.AddEmployee(entities.EmployeeFromProtoToStorage(req.Employee))
+	if err != nil {
 		return nil, err
 	}
 	count, _ := e.repository.Count()
-	log.Printf("employee with badge %d successfully saved; now have %d\n", req.Employee.BadgeNumber, count)
-	return &proto.EmployeeResponse{Employee: req.Employee}, nil
+	log.Printf("employee %s successfully saved; now have %d\n", employee.ID, count)
+	return &proto.EmployeeResponse{Employee: entities.EmployeeFromStorageToProto(employee)}, nil
 }
-
-func (e *employeeService) SaveAll(stream proto.EmployeeService_SaveAllServer) error {
+func (e *employeeService) AddEmployees(stream proto.EmployeeService_AddEmployeesServer) error {
 	initialCount, err := e.repository.Count()
 	if err != nil {
 		return err
@@ -144,12 +101,13 @@ func (e *employeeService) SaveAll(stream proto.EmployeeService_SaveAllServer) er
 		if err != nil {
 			return err
 		}
-		if err := e.repository.AddEmployee(entities.EmployeeFromProtoToStorage(emp.Employee)); err != nil {
+		saved, err := e.repository.AddEmployee(entities.EmployeeFromProtoToStorage(emp.Employee))
+		if err != nil {
 			errorMessage += fmt.Sprintf("\n%s", err.Error())
 			continue
 		}
 		if err := stream.Send(&proto.EmployeeResponse{
-			Employee: emp.Employee,
+			Employee: entities.EmployeeFromStorageToProto(saved),
 		}); err != nil {
 			return err
 		}
@@ -164,4 +122,66 @@ func (e *employeeService) SaveAll(stream proto.EmployeeService_SaveAllServer) er
 	}
 	log.Printf("successfully saved %d employees;\n now have %d\n", savedCount, current)
 	return nil
+}
+
+func (e *employeeService) AddAttachment(stream proto.EmployeeService_AddAttachmentServer) error {
+	md, ok := metadata.FromIncomingContext(stream.Context())
+	var userID string
+	var fileName string
+	if ok {
+		userID = md.Get("userID")[0]
+		fileName = md.Get("filename")[0]
+		emp, err := e.repository.GetEmployee(userID)
+		if err != nil {
+			return err
+		}
+		log.Printf("receiving photo for user %s (%s %s)\n", emp.ID, emp.FirstName, emp.LastName)
+	}
+	imgData := []byte{}
+	for {
+		data, err := stream.Recv()
+		if err == io.EOF {
+			log.Printf("file received with length: %d\n", len(imgData))
+			document, err := e.documents.SaveDocument(userID, fileName, imgData)
+			document.UserID = userID
+			if err != nil {
+				return err
+			}
+			e.repository.AddDocument(userID, document.ID)
+			return stream.SendAndClose(entities.DocumentFromStorageToProto(document))
+		}
+		if err != nil {
+			return err
+		}
+		log.Printf("received %d bytes\n", len(data.Data))
+		imgData = append(imgData, data.Data...)
+	}
+}
+
+func (e *employeeService) AttachmentByID(ctx context.Context, req *proto.ByIDRequest) (*proto.Attachment, error) {
+	doc, err := e.documents.GetDocument(req.ID)
+	if err != nil {
+		return nil, err
+	}
+	return entities.DocumentFromStorageToProto(doc), nil
+}
+
+func (e *employeeService) DeleteEmployee(ctx context.Context, req *proto.ByIDRequest) (*proto.EmployeeResponse, error) {
+	employee, err := e.repository.DeleteEmployee(req.ID)
+	if err != nil {
+		return nil, err
+	}
+	return &proto.EmployeeResponse{
+		Employee: entities.EmployeeFromStorageToProto(employee),
+	}, nil
+}
+
+func (e *employeeService) UpdateEmployee(ctx context.Context, req *proto.EmployeeRequest) (*proto.EmployeeResponse, error) {
+	employee, err := e.repository.UpdateEmployee(entities.EmployeeFromProtoToStorage(req.Employee))
+	if err != nil {
+		return nil, err
+	}
+	return &proto.EmployeeResponse{
+		Employee: entities.EmployeeFromStorageToProto(employee),
+	}, nil
 }

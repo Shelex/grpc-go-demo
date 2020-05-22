@@ -1,45 +1,61 @@
-type Vacation {
-  Id: Int!
-  StartDate: Int!
-  Duration: Float!
-  IsCancelled: Boolean!
+type vacation {
+  id: String!
+  startDate: Int!
+  durationHours: Float!
+  approved: Boolean!
+  cancelled: Boolean!
 }
 
-type Employee {
-  Id: Int!
-  BadgeNumber: Int!
-  FirstName: String!
-  LastName: String!
-  VacationAccrualRate: Float!
-  VacationAccrued: Float!
-  Vacations: [Vacation]
-  Documents: [String!]
+scalar Bytes
+
+type document {
+  id: String!
+  userID: String
+  fileName: String!
+	data     : Bytes
+	createdAt: Int!
 }
 
-input EmployeeInput {
-  Id: Int!
-  BadgeNumber: Int!
-  FirstName: String!
-  LastName: String!
-  VacationAccrualRate: Float!
+type employee {
+  id: String!
+  badgeNumber: Int!
+  firstName: String!
+  lastName: String!
+  countryCode: String!
+  vacationAccrualRate: Float!
+  vacationAccrued: Float!
+  vacations: [vacation]
+  documents: [String]!
 }
 
-type EmployeeSaveResult {
-  savedEmployees: [Employee!]!
-  error: String!
+input employeeInput {
+  badgeNumber: Int!
+  firstName: String!
+  lastName: String!
+  countryCode: String!
+  vacationAccrualRate: Float!
+}
+
+type employeeSaveResult {
+  savedEmployees: [employee!]!
+  errors: String
 }
 
 scalar Upload
 
 type Query {
-  getByBadge (badgeNumber: Int!): Employee
-  getAll: [Employee!]!
+  employees: [employee!]!
+  employee (id: String!): employee
+  attachment(id: String!): document
+  
 }
 
 type Mutation {
-	AddEmployeeAttachment (file: Upload!, badgeNumber: Int!): Boolean!
-	Save (employee: EmployeeInput!): Employee!
-	SaveAll (employees: [EmployeeInput!]!): EmployeeSaveResult!
+  addEmployee (employee: employeeInput!): employee!
+	addEmployees (employees: [employeeInput!]!): employeeSaveResult!
+  addAttachment (userID: String!, file: Upload!): document!
+  updateEmployee (employee: employeeInput!): employee!
+  deleteEmployee (userID: String!): employee!
 }
 
 schema {

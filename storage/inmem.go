@@ -1,60 +1,64 @@
 package storage
 
 import (
-	"errors"
 	"fmt"
+	"log"
 
 	"github.com/Shelex/grpc-go-demo/entities"
+	"github.com/google/uuid"
 )
 
 type Storage interface {
-	GetByBadge(badgeNum int32) (entities.Employee, error)
+	GetEmployee(ID string) (entities.Employee, error)
 	GetAll() ([]entities.Employee, error)
-	AddEmployee(entities.Employee) error
+	AddEmployee(entities.Employee) (entities.Employee, error)
 	Count() (int, error)
+	UpdateEmployee(entities.Employee) (entities.Employee, error)
+	DeleteEmployee(ID string) (entities.Employee, error)
+	AddDocument(userID string, ID string) error
 }
 
 type InMem struct {
-	employees []entities.Employee
+	employees map[string]entities.Employee
 }
 
 func NewInMemStorage() Storage {
 	return &InMem{
-		employees: []entities.Employee{
-			{
-				Id:                  1,
+		employees: map[string]entities.Employee{
+			"1": {
+				ID:                  "1",
 				BadgeNumber:         7975,
 				FirstName:           "John",
 				LastName:            "Doe",
 				VacationAccrualRate: 2,
 				VacationAccrued:     30,
 			},
-			{
-				Id:                  2,
+			"2": {
+				ID:                  "2",
 				BadgeNumber:         7294,
 				FirstName:           "Mark",
 				LastName:            "Murphy",
 				VacationAccrualRate: 2.3,
 				VacationAccrued:     21.4,
 			},
-			{
-				Id:                  3,
+			"3": {
+				ID:                  "3",
 				BadgeNumber:         5193,
 				FirstName:           "Donna",
 				LastName:            "Cortez",
 				VacationAccrualRate: 3,
 				VacationAccrued:     23.2,
 			},
-			{
-				Id:                  4,
+			"4": {
+				ID:                  "4",
 				BadgeNumber:         8480,
 				FirstName:           "Micheal",
 				LastName:            "Wood",
 				VacationAccrualRate: 3.4,
 				VacationAccrued:     45.2,
 			},
-			{
-				Id:                  5,
+			"5": {
+				ID:                  "5",
 				BadgeNumber:         6238,
 				FirstName:           "Louis",
 				LastName:            "Alvarez",
@@ -65,27 +69,85 @@ func NewInMemStorage() Storage {
 	}
 }
 
-func (i *InMem) GetByBadge(badgeNum int32) (entities.Employee, error) {
-	for _, e := range i.employees {
-		if badgeNum == e.BadgeNumber {
-			return e, nil
-		}
+func (i *InMem) GetEmployee(ID string) (entities.Employee, error) {
+	e, ok := i.employees[ID]
+	if !ok {
+		return e, fmt.Errorf("employee with id %s not found", ID)
 	}
-	return entities.Employee{}, errors.New("employee not found")
+	return e, nil
 }
 
 func (i *InMem) GetAll() ([]entities.Employee, error) {
-	return i.employees, nil
+	count, err := i.Count()
+	if err != nil {
+		return nil, err
+	}
+	employees := make([]entities.Employee, 0, count)
+	for _, e := range i.employees {
+		employees = append(employees, e)
+	}
+	return employees, nil
 }
 
-func (i *InMem) AddEmployee(e entities.Employee) error {
+func (i *InMem) AddEmployee(e entities.Employee) (entities.Employee, error) {
+	var empty entities.Employee
 	for _, employee := range i.employees {
 		if e.BadgeNumber == employee.BadgeNumber {
-			return fmt.Errorf("badge number %d is duplicated", e.BadgeNumber)
+			return empty, fmt.Errorf("badge number %d is duplicated", e.BadgeNumber)
 		}
 	}
-	i.employees = append(i.employees, e)
+	userID := uuid.New().String()
+
+	log.Printf("saving user id %s", userID)
+	e.ID = userID
+
+	i.employees[userID] = e
+	return e, nil
+}
+
+func (i *InMem) UpdateEmployee(e entities.Employee) (entities.Employee, error) {
+	var empty entities.Employee
+	emp, ok := i.employees[e.ID]
+	if !ok {
+		return empty, fmt.Errorf("employee with id %s not found", e.ID)
+	}
+	if e.BadgeNumber != 0 {
+		emp.BadgeNumber = e.BadgeNumber
+	}
+	if e.FirstName != "" {
+		emp.FirstName = e.FirstName
+	}
+	if e.LastName != "" {
+		emp.LastName = e.LastName
+	}
+	if e.VacationAccrualRate != 0 {
+		emp.VacationAccrualRate = e.VacationAccrualRate
+	}
+	if e.VacationAccrued != 0 {
+		emp.VacationAccrualRate = e.VacationAccrualRate
+	}
+	i.employees[e.ID] = emp
+	return emp, nil
+}
+
+func (i *InMem) AddDocument(userID string, ID string) error {
+	emp, ok := i.employees[userID]
+	if !ok {
+		return fmt.Errorf("employee with id %s not found", userID)
+	}
+	emp.Documents = append(emp.Documents, ID)
+	i.employees[userID] = emp
 	return nil
+}
+
+func (i *InMem) DeleteEmployee(userID string) (entities.Employee, error) {
+	var empty entities.Employee
+	emp, ok := i.employees[userID]
+	if !ok {
+		return empty, fmt.Errorf("employee with id %s not found", userID)
+	}
+	delete(i.employees, userID)
+	return emp, nil
 }
 
 func (i *InMem) Count() (int, error) {

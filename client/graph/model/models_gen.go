@@ -2,33 +2,43 @@
 
 package model
 
+type Document struct {
+	ID        string  `json:"id"`
+	UserID    *string `json:"userID"`
+	FileName  string  `json:"fileName"`
+	Data      *string `json:"data"`
+	CreatedAt int     `json:"createdAt"`
+}
+
 type Employee struct {
-	ID                  int         `json:"Id"`
-	BadgeNumber         int         `json:"BadgeNumber"`
-	FirstName           string      `json:"FirstName"`
-	LastName            string      `json:"LastName"`
-	VacationAccrualRate float64     `json:"VacationAccrualRate"`
-	VacationAccrued     float64     `json:"VacationAccrued"`
-	Vacations           []*Vacation `json:"Vacations"`
-	Documents           []string    `json:"Documents"`
+	ID                  string      `json:"id"`
+	BadgeNumber         int         `json:"badgeNumber"`
+	FirstName           string      `json:"firstName"`
+	LastName            string      `json:"lastName"`
+	CountryCode         string      `json:"countryCode"`
+	VacationAccrualRate float64     `json:"vacationAccrualRate"`
+	VacationAccrued     float64     `json:"vacationAccrued"`
+	Vacations           []*Vacation `json:"vacations"`
+	Documents           []*string   `json:"documents"`
 }
 
 type EmployeeInput struct {
-	ID                  int     `json:"Id"`
-	BadgeNumber         int     `json:"BadgeNumber"`
-	FirstName           string  `json:"FirstName"`
-	LastName            string  `json:"LastName"`
-	VacationAccrualRate float64 `json:"VacationAccrualRate"`
+	BadgeNumber         int     `json:"badgeNumber"`
+	FirstName           string  `json:"firstName"`
+	LastName            string  `json:"lastName"`
+	CountryCode         string  `json:"countryCode"`
+	VacationAccrualRate float64 `json:"vacationAccrualRate"`
 }
 
 type EmployeeSaveResult struct {
 	SavedEmployees []*Employee `json:"savedEmployees"`
-	Error          string      `json:"error"`
+	Errors         *string     `json:"errors"`
 }
 
 type Vacation struct {
-	ID          int     `json:"Id"`
-	StartDate   int     `json:"StartDate"`
-	Duration    float64 `json:"Duration"`
-	IsCancelled bool    `json:"IsCancelled"`
+	ID            string  `json:"id"`
+	StartDate     int     `json:"startDate"`
+	DurationHours float64 `json:"durationHours"`
+	Approved      bool    `json:"approved"`
+	Cancelled     bool    `json:"cancelled"`
 }

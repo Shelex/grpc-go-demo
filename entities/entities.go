@@ -5,17 +5,19 @@ import (
 )
 
 type Vacation struct {
-	Id          int32
-	StartDate   int64
-	Duration    float32
-	IsCancelled bool
+	ID            string
+	StartDate     int64
+	DurationHours float32
+	Approved      bool
+	Cancelled     bool
 }
 
 type Employee struct {
-	Id                  int32
+	ID                  string
 	BadgeNumber         int32
 	FirstName           string
 	LastName            string
+	CountryCode         string
 	VacationAccrualRate float32
 	VacationAccrued     float32
 	Vacations           []Vacation
@@ -23,17 +25,30 @@ type Employee struct {
 }
 
 type Document struct {
+	ID        string
+	UserID    string
 	FileName  string
 	Data      []byte
 	CreatedAt int64 // Unix timestamp
 }
 
+func DocumentFromStorageToProto(d Document) *proto.Attachment {
+	return &proto.Attachment{
+		ID:        d.ID,
+		UserID:    d.UserID,
+		Filename:  d.FileName,
+		CreatedAt: d.CreatedAt,
+		Data:      d.Data,
+	}
+}
+
 func EmployeeFromStorageToProto(e Employee) *proto.Employee {
 	return &proto.Employee{
-		Id:                  e.Id,
+		ID:                  e.ID,
 		BadgeNumber:         e.BadgeNumber,
 		FirstName:           e.FirstName,
 		LastName:            e.LastName,
+		CountryCode:         e.CountryCode,
 		VacationAccrualRate: e.VacationAccrualRate,
 		VacationAccrued:     e.VacationAccrued,
 		Vacations:           VacationsFromStorageToProto(e.Vacations),
@@ -43,10 +58,11 @@ func EmployeeFromStorageToProto(e Employee) *proto.Employee {
 
 func EmployeeFromProtoToStorage(e *proto.Employee) Employee {
 	return Employee{
-		Id:                  e.Id,
+		ID:                  e.ID,
 		BadgeNumber:         e.BadgeNumber,
 		FirstName:           e.FirstName,
 		LastName:            e.LastName,
+		CountryCode:         e.CountryCode,
 		VacationAccrualRate: e.VacationAccrualRate,
 		VacationAccrued:     e.VacationAccrued,
 	}
@@ -55,12 +71,27 @@ func EmployeeFromProtoToStorage(e *proto.Employee) Employee {
 func VacationsFromStorageToProto(vacations []Vacation) []*proto.Vacation {
 	protoVacations := make([]*proto.Vacation, len(vacations))
 	for _, v := range vacations {
-		protoVacations = append(protoVacations, &proto.Vacation{
-			Id:          v.Id,
-			Duration:    v.Duration,
-			IsCancelled: v.IsCancelled,
-			StartDate:   v.StartDate,
-		})
+		protoVacations = append(protoVacations, VacationFromStorageToProto(v))
 	}
 	return protoVacations
+}
+
+func VacationFromStorageToProto(v Vacation) *proto.Vacation {
+	return &proto.Vacation{
+		ID:            v.ID,
+		StartDate:     v.StartDate,
+		DurationHours: v.DurationHours,
+		Approved:      v.Approved,
+		Cancelled:     v.Cancelled,
+	}
+}
+
+func VacationFromProtoToStorage(v *proto.Vacation) Vacation {
+	return Vacation{
+		ID:            v.ID,
+		StartDate:     v.StartDate,
+		DurationHours: v.DurationHours,
+		Approved:      v.Approved,
+		Cancelled:     v.Cancelled,
+	}
 }

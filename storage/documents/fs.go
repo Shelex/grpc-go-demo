@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strconv"
 	"time"
 
 	"github.com/Shelex/grpc-go-demo/entities"
@@ -17,119 +16,93 @@ const (
 )
 
 type FileStorage interface {
-	GetEmployeeDocuments(badgeNum int32) ([]string, error)
-	GetEmployeeDocument(badgeNum int32, filename string) (entities.Document, error)
-	SaveDocument(badgeNum int32, data []byte) error
-	RemoveDocument(badgeNum int32, filename string) error
-	RemoveEmployeeDocuments(badgeNum int32) error
+	SaveDocument(userID string, filename string, data []byte) (entities.Document, error)
+	GetDocument(id string) (entities.Document, error)
+	DeleteDocument(id string) error
 }
 
-type LocalFS struct {
-	by byBadge
-}
-
-type byBadge map[int32]byFileName
-
-type byFileName map[string]entities.Document
+type LocalFS map[string]entities.Document
 
 func NewLocalFS() FileStorage {
-	by := make(byBadge)
-	return &LocalFS{
-		by: by,
-	}
+	fs := make(LocalFS)
+	return &fs
 }
 
-func (l *LocalFS) GetEmployeeDocuments(badgeNum int32) ([]string, error) {
-	if _, ok := l.by[badgeNum]; ok {
-		files := make([]string, 0, len(l.by[badgeNum]))
-		for filename := range l.by[badgeNum] {
-			files = append(files, filename)
-		}
-		return files, nil
+func (l *LocalFS) GetDocument(id string) (entities.Document, error) {
+	doc, ok := (*l)[id]
+	if !ok {
+		return doc, fmt.Errorf("document with id %s not found", id)
 	}
-	return nil, fmt.Errorf("no documents found for employee %d", badgeNum)
+
+	ext := filepath.Ext(doc.FileName)
+
+	path := filepath.Join(localRepo, doc.ID+ext)
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return doc, fmt.Errorf("document with id %s not found", id)
+	}
+
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return doc, err
+	}
+	doc.Data = data
+	return doc, nil
 }
 
-func (l *LocalFS) GetEmployeeDocument(badgeNum int32, filename string) (entities.Document, error) {
-	basePath := filepath.Join(localRepo, strconv.FormatInt(int64(badgeNum), 10))
+func (l *LocalFS) SaveDocument(userID string, filename string, data []byte) (entities.Document, error) {
 	var empty entities.Document
-	if _, ok := l.by[badgeNum]; ok {
-		if document, ok := l.by[badgeNum][filename]; ok {
-			path := filepath.Join(basePath, filename)
-			data, err := ioutil.ReadFile(path)
-			if err != nil {
-				return empty, err
-			}
-			document.Data = data
-			return document, nil
+	if _, err := os.Stat(localRepo); os.IsNotExist(err) {
+		if err := os.MkdirAll(localRepo, os.ModePerm); err != nil {
+			return empty, err
 		}
-		return empty, fmt.Errorf("document %s for employee %d not found", filename, badgeNum)
+	} else if err != nil {
+		return empty, err
 	}
-	return empty, fmt.Errorf("no documents found for employee %d", badgeNum)
-}
-
-func (l *LocalFS) SaveDocument(badgeNum int32, data []byte) error {
-	badgePath := strconv.FormatInt(int64(badgeNum), 10)
-	basePath := filepath.Join(localRepo, badgePath)
-	if err := os.MkdirAll(basePath, os.ModePerm); err != nil {
-		return err
+	extension := filepath.Ext(filename)
+	newID, err := uuid.NewUUID()
+	if err != nil {
+		return empty, err
 	}
+	documentID := newID.String()
 
-	filename := fmt.Sprintf("%d-%s.png", badgeNum, uuid.New().String())
-	path := filepath.Join(basePath, filename)
+	path := filepath.Join(localRepo, documentID+extension)
 
 	if err := ioutil.WriteFile(path, data, os.ModePerm); err != nil {
-		return err
+		return empty, err
 	}
 
-	if _, ok := l.by[badgeNum]; !ok {
-		l.by[badgeNum] = make(byFileName)
+	if _, ok := (*l)[documentID]; ok {
+		return empty, fmt.Errorf("document with id %s already exists", documentID)
 	}
 
 	document := entities.Document{
+		ID:        documentID,
 		FileName:  filename,
 		Data:      []byte{},
 		CreatedAt: time.Now().Unix(),
 	}
 
-	l.by[badgeNum][filename] = document
+	(*l)[documentID] = document
 
-	return nil
+	return document, nil
 }
 
-func (l *LocalFS) RemoveDocument(badgeNum int32, filename string) error {
-
-	if _, ok := l.by[badgeNum]; !ok {
-		return fmt.Errorf("documents for employee %d not found", badgeNum)
+func (l *LocalFS) DeleteDocument(id string) error {
+	doc, ok := (*l)[id]
+	if !ok {
+		return fmt.Errorf("document with id %s not found", id)
 	}
 
-	if _, ok := l.by[badgeNum][filename]; !ok {
-		return fmt.Errorf("file %s for employee %d not found", filename, badgeNum)
-	}
+	ext := filepath.Ext(doc.FileName)
 
-	path := filepath.Join(localRepo, strconv.FormatInt(int64(badgeNum), 10), filename)
+	path := filepath.Join(localRepo, doc.ID+ext)
 
 	if err := os.Remove(path); err != nil {
 		return err
 	}
 
-	delete(l.by[badgeNum], filename)
-
-	return nil
-}
-
-func (l *LocalFS) RemoveEmployeeDocuments(badgeNum int32) error {
-	if _, ok := l.by[badgeNum]; !ok {
-		return fmt.Errorf("documents for employee %d not found", badgeNum)
-	}
-
-	path := filepath.Join(localRepo, strconv.FormatInt(int64(badgeNum), 10))
-
-	if err := os.RemoveAll(path); err != nil {
-		return err
-	}
-
-	delete(l.by, badgeNum)
+	delete((*l), id)
 
 	return nil
 }

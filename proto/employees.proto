@@ -3,40 +3,52 @@ syntax = "proto3";
 option go_package = "proto;proto";
 
 service EmployeeService {
-    // Unary
-    rpc GetByBadgeNumber (GetByBadgeNumberRequest) returns (EmployeeResponse);
-    rpc Save (EmployeeRequest) returns (EmployeeResponse);
-    // Client streaming
-    rpc AddEmployeeAttachment (stream AddAttachmentRequest) returns (AddAttachmentResponse);
-    // Server streaming
-    rpc GetAll (GetAllRequest) returns (stream EmployeeResponse);
-    // Bidirectional streaming
-    rpc SaveAll (stream EmployeeRequest) returns (stream EmployeeResponse);
-    
+    // Server streaming:
+    rpc Employees (GetAllRequest) returns (stream EmployeeResponse);
+    rpc EmployeeByID (ByIDRequest) returns (EmployeeResponse);
+    rpc AddEmployee (EmployeeRequest) returns (EmployeeResponse);
+    // Bidirectional streaming:
+    rpc AddEmployees  (stream EmployeeRequest) returns (stream EmployeeResponse);
+    // Client streaming:
+    rpc AddAttachment (stream AttachmentRequest) returns (Attachment);
+    rpc AttachmentByID (ByIDRequest) returns (Attachment);
+    rpc DeleteEmployee (ByIDRequest) returns (EmployeeResponse);
+    rpc UpdateEmployee (EmployeeRequest) returns (EmployeeResponse);
 }
 
 message Employee {
-    int32 id = 1;
+    string ID = 1;
     int32 badgeNumber = 2;
     string firstName = 3;
     string lastName = 4;
-    float vacationAccrualRate = 5;
-    float vacationAccrued = 6;
-    repeated Vacation vacations = 7;
-    repeated string Documents = 8;
+    string countryCode = 5;
+    float vacationAccrualRate = 6;
+    float vacationAccrued = 7;
+    repeated Vacation vacations = 8;
+    repeated string documents = 9;
 }
 
 message Vacation {
-    int32 id = 1;
+    string ID = 1;
     int64 startDate = 2;
-    float duration = 3;
-    bool isCancelled = 4;
+    float durationHours = 3;
+    bool approved = 4;
+    bool cancelled = 5;
+}
+
+message Attachment {
+    string ID = 1;
+    string userID = 2;
+    string filename = 3;
+    bytes data = 4;
+    int64 createdAt = 5;
 }
 
 message GetAllRequest {}
 
-message GetByBadgeNumberRequest {
-    int32 badgeNumber = 1;
+
+message ByIDRequest {
+    string ID = 1;
 }
 
 message EmployeeRequest {
@@ -47,10 +59,8 @@ message EmployeeResponse {
     Employee employee = 1;
 }
 
-message AddAttachmentRequest {
-    bytes data = 1;
-}
-
-message AddAttachmentResponse {
-    bool isOk = 1;
+message AttachmentRequest {
+    string userID = 1;
+    string filename = 2;
+    bytes data = 3;
 }
