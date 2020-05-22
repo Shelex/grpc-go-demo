@@ -3,6 +3,7 @@ package storage
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/Shelex/grpc-go-demo/entities"
 	"github.com/google/uuid"
@@ -16,6 +17,8 @@ type Storage interface {
 	UpdateEmployee(entities.Employee) (entities.Employee, error)
 	DeleteEmployee(ID string) (entities.Employee, error)
 	AddDocument(userID string, ID string) error
+
+	AddVacation(userID string, startDate int64, durationHours float32) (entities.Vacation, error)
 }
 
 type InMem struct {
@@ -152,4 +155,25 @@ func (i *InMem) DeleteEmployee(userID string) (entities.Employee, error) {
 
 func (i *InMem) Count() (int, error) {
 	return len(i.employees), nil
+}
+
+func (i *InMem) AddVacation(userID string, startDate int64, durationHours float32) (entities.Vacation, error) {
+	var v entities.Vacation
+	employee, ok := i.employees[userID]
+	if !ok {
+		return v, fmt.Errorf("employee with id %s not found", userID)
+	}
+	start := time.Unix(startDate, 0)
+	tomorrow := time.Now().Add(24 * time.Hour)
+
+	after := start.After(tomorrow)
+	if !after {
+		return v, fmt.Errorf("vacation start date should be not less 24 hours from now")
+	}
+	v.ID = uuid.New().String()
+	v.StartDate = startDate
+	v.DurationHours = durationHours
+	employee.Vacations = append(employee.Vacations, v)
+	i.employees[userID] = employee
+	return v, nil
 }

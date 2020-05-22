@@ -47,6 +47,7 @@ type ComplexityRoot struct {
 		AddAttachment  func(childComplexity int, userID string, file graphql.Upload) int
 		AddEmployee    func(childComplexity int, employee model.EmployeeInput) int
 		AddEmployees   func(childComplexity int, employees []*model.EmployeeInput) int
+		AddVacation    func(childComplexity int, vacation model.VacationRequest) int
 		DeleteEmployee func(childComplexity int, userID string) int
 		UpdateEmployee func(childComplexity int, employee model.EmployeeInput) int
 	}
@@ -97,6 +98,7 @@ type MutationResolver interface {
 	AddAttachment(ctx context.Context, userID string, file graphql.Upload) (*model.Document, error)
 	UpdateEmployee(ctx context.Context, employee model.EmployeeInput) (*model.Employee, error)
 	DeleteEmployee(ctx context.Context, userID string) (*model.Employee, error)
+	AddVacation(ctx context.Context, vacation model.VacationRequest) (*model.Vacation, error)
 }
 type QueryResolver interface {
 	Employees(ctx context.Context) ([]*model.Employee, error)
@@ -154,6 +156,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.AddEmployees(childComplexity, args["employees"].([]*model.EmployeeInput)), true
+
+	case "Mutation.addVacation":
+		if e.complexity.Mutation.AddVacation == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addVacation_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddVacation(childComplexity, args["vacation"].(model.VacationRequest)), true
 
 	case "Mutation.deleteEmployee":
 		if e.complexity.Mutation.DeleteEmployee == nil {
@@ -429,6 +443,12 @@ var sources = []*ast.Source{
   cancelled: Boolean!
 }
 
+input vacationRequest {
+  userID: String!
+  startDate: Int!
+  durationHours: Float!
+}
+
 scalar Bytes
 
 type document {
@@ -479,6 +499,8 @@ type Mutation {
   addAttachment (userID: String!, file: Upload!): document!
   updateEmployee (employee: employeeInput!): employee!
   deleteEmployee (userID: String!): employee!
+
+  addVacation (vacation: vacationRequest!): vacation! 
 }
 
 schema {
@@ -540,6 +562,20 @@ func (ec *executionContext) field_Mutation_addEmployees_args(ctx context.Context
 		}
 	}
 	args["employees"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_addVacation_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.VacationRequest
+	if tmp, ok := rawArgs["vacation"]; ok {
+		arg0, err = ec.unmarshalNvacationRequest2githubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐVacationRequest(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["vacation"] = arg0
 	return args, nil
 }
 
@@ -852,6 +888,47 @@ func (ec *executionContext) _Mutation_deleteEmployee(ctx context.Context, field 
 	res := resTmp.(*model.Employee)
 	fc.Result = res
 	return ec.marshalNemployee2ᚖgithubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐEmployee(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_addVacation(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_addVacation_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddVacation(rctx, args["vacation"].(model.VacationRequest))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Vacation)
+	fc.Result = res
+	return ec.marshalNvacation2ᚖgithubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐVacation(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_employees(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2832,6 +2909,36 @@ func (ec *executionContext) unmarshalInputemployeeInput(ctx context.Context, obj
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputvacationRequest(ctx context.Context, obj interface{}) (model.VacationRequest, error) {
+	var it model.VacationRequest
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "userID":
+			var err error
+			it.UserID, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "startDate":
+			var err error
+			it.StartDate, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "durationHours":
+			var err error
+			it.DurationHours, err = ec.unmarshalNFloat2float64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -2877,6 +2984,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "deleteEmployee":
 			out.Values[i] = ec._Mutation_deleteEmployee(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "addVacation":
+			out.Values[i] = ec._Mutation_addVacation(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3817,6 +3929,24 @@ func (ec *executionContext) marshalNemployeeSaveResult2ᚖgithubᚗcomᚋShelex�
 		return graphql.Null
 	}
 	return ec._employeeSaveResult(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNvacation2githubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐVacation(ctx context.Context, sel ast.SelectionSet, v model.Vacation) graphql.Marshaler {
+	return ec._vacation(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNvacation2ᚖgithubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐVacation(ctx context.Context, sel ast.SelectionSet, v *model.Vacation) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._vacation(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNvacationRequest2githubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐVacationRequest(ctx context.Context, v interface{}) (model.VacationRequest, error) {
+	return ec.unmarshalInputvacationRequest(ctx, v)
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {

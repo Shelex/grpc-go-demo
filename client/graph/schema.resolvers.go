@@ -114,6 +114,18 @@ func (r *mutationResolver) DeleteEmployee(ctx context.Context, userID string) (*
 	return factory.EmployeeFromProtoToApi(res.Employee), nil
 }
 
+func (r *mutationResolver) AddVacation(ctx context.Context, req model.VacationRequest) (*model.Vacation, error) {
+	vacation, err := r.employeeServiceClient.AddVacation(ctx, &proto.VacationRequest{
+		UserID:        req.UserID,
+		StartDate:     int64(req.StartDate),
+		DurationHours: float32(req.DurationHours),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return factory.VacationFromProtoToApi(vacation), nil
+}
+
 func (r *queryResolver) Employees(ctx context.Context) ([]*model.Employee, error) {
 	stream, err := r.employeeServiceClient.Employees(context.Background(), &proto.GetAllRequest{})
 	if err != nil {

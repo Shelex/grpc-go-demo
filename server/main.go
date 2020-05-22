@@ -185,3 +185,11 @@ func (e *employeeService) UpdateEmployee(ctx context.Context, req *proto.Employe
 		Employee: entities.EmployeeFromStorageToProto(employee),
 	}, nil
 }
+
+func (e *employeeService) AddVacation(ctx context.Context, req *proto.VacationRequest) (*proto.Vacation, error) {
+	vacation, err := e.repository.AddVacation(req.UserID, req.StartDate, req.DurationHours)
+	if err != nil {
+		return nil, err
+	}
+	return entities.VacationFromStorageToProto(vacation), nil
+}

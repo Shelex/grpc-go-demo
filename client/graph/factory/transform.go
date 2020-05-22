@@ -36,15 +36,19 @@ func EmployeeFromProtoToApi(e *proto.Employee) *model.Employee {
 func VacationsFromProtoToApi(vacations []*proto.Vacation) []*model.Vacation {
 	apiVacations := make([]*model.Vacation, 0, len(vacations))
 	for _, v := range vacations {
-		apiVacations = append(apiVacations, &model.Vacation{
-			ID:            v.ID,
-			DurationHours: float64(v.DurationHours),
-			StartDate:     int(v.StartDate),
-			Cancelled:     v.Cancelled,
-			Approved:      v.Approved,
-		})
+		apiVacations = append(apiVacations, VacationFromProtoToApi(v))
 	}
 	return apiVacations
+}
+
+func VacationFromProtoToApi(v *proto.Vacation) *model.Vacation {
+	return &model.Vacation{
+		ID:            v.ID,
+		DurationHours: float64(v.DurationHours),
+		StartDate:     int(v.StartDate),
+		Cancelled:     v.Cancelled,
+		Approved:      v.Approved,
+	}
 }
 
 func AttachmentFromProtoToApi(a *proto.Attachment) *model.Document {

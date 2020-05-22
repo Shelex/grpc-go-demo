@@ -42,3 +42,9 @@ type Vacation struct {
 	Approved      bool    `json:"approved"`
 	Cancelled     bool    `json:"cancelled"`
 }
+
+type VacationRequest struct {
+	UserID        string  `json:"userID"`
+	StartDate     int     `json:"startDate"`
+	DurationHours float64 `json:"durationHours"`
+}

@@ -14,6 +14,8 @@ service EmployeeService {
     rpc AttachmentByID (ByIDRequest) returns (Attachment);
     rpc DeleteEmployee (ByIDRequest) returns (EmployeeResponse);
     rpc UpdateEmployee (EmployeeRequest) returns (EmployeeResponse);
+
+    rpc AddVacation(VacationRequest) returns (Vacation);
 }
 
 message Employee {
@@ -34,6 +36,12 @@ message Vacation {
     float durationHours = 3;
     bool approved = 4;
     bool cancelled = 5;
+}
+
+message VacationRequest {
+    string userID  = 1;
+    int64 startDate = 2;
+    float durationHours = 3;
 }
 
 message Attachment {

@@ -6,6 +6,12 @@ type vacation {
   cancelled: Boolean!
 }
 
+input vacationRequest {
+  userID: String!
+  startDate: Int!
+  durationHours: Float!
+}
+
 scalar Bytes
 
 type document {
@@ -56,6 +62,8 @@ type Mutation {
   addAttachment (userID: String!, file: Upload!): document!
   updateEmployee (employee: employeeInput!): employee!
   deleteEmployee (userID: String!): employee!
+
+  addVacation (vacation: vacationRequest!): vacation! 
 }
 
 schema {
