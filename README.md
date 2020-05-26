@@ -170,7 +170,8 @@ query {
     data
     createdAt
     }
-  }``` 
+  }
+  ``` 
 
 
 - mutation updateEmployee(employee): update employee fields
