@@ -242,9 +242,11 @@ query {
 
 
  # TODO
-  - add checks for add, update employee queries checks for badgeNum duplication
-  - persistence layer for server (Mongo/Postgres/S3 for files)
-  - add graceful shutdown
-  - logging, better error handling, add wrapping where needed
-  - dockerize
-  - deploy (to Heroku, for example)
+  - :white_check_mark: storage with Mongo    
+  - :x: storage with Postgres    
+  - :x: storage for files with S3    
+  - :x: add checks for add, update employee queries checks for badgeNum duplication    
+  - :x: add graceful shutdown    
+  - :x: logging, better error handling, add wrapping where needed    
+  - :x: dockerize    
+  - :x: deploy (to Heroku, for example)    
