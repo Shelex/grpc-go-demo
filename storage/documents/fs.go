@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/Shelex/grpc-go-demo/entities"
+	"github.com/Shelex/grpc-go-demo/domain/entities"
 	"github.com/google/uuid"
 )
 

@@ -8,7 +8,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/Shelex/grpc-go-demo/entities"
+	"github.com/Shelex/grpc-go-demo/domain/entities"
 	"github.com/Shelex/grpc-go-demo/proto"
 	"github.com/Shelex/grpc-go-demo/storage"
 	"github.com/Shelex/grpc-go-demo/storage/documents"
@@ -147,7 +147,9 @@ func (e *employeeService) AddAttachment(stream proto.EmployeeService_AddAttachme
 			if err != nil {
 				return err
 			}
-			e.repository.AddDocument(userID, document.ID)
+			if err := e.repository.AddDocument(userID, document.ID); err != nil {
+				return err
+			}
 			return stream.SendAndClose(entities.DocumentFromStorageToProto(document))
 		}
 		if err != nil {

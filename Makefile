@@ -16,7 +16,7 @@ build:
 
 .PHONY: build-server
 build-server: 
-	go build -o ./cmd/server ./server
+	go build -o ./cmd/server ./domain
 
 .PHONY: build-client
 build-client: 
