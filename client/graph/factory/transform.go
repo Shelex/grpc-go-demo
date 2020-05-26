@@ -12,6 +12,7 @@ func EmployeeFromAPIToProto(e model.EmployeeInput) *proto.Employee {
 		LastName:            e.LastName,
 		CountryCode:         e.CountryCode,
 		VacationAccrualRate: float32(e.VacationAccrualRate),
+		VacationAccrued:     float32(e.VacationAccrued),
 	}
 }
 

@@ -94,9 +94,12 @@ func (r *mutationResolver) AddAttachment(ctx context.Context, userID string, fil
 	return factory.AttachmentFromProtoToApi(res), nil
 }
 
-func (r *mutationResolver) UpdateEmployee(ctx context.Context, employee model.EmployeeInput) (*model.Employee, error) {
-	res, err := r.employeeServiceClient.UpdateEmployee(ctx, &proto.EmployeeRequest{
-		Employee: factory.EmployeeFromAPIToProto(employee),
+func (r *mutationResolver) UpdateEmployee(ctx context.Context, userID string, employee model.EmployeeInput) (*model.Employee, error) {
+	res, err := r.employeeServiceClient.UpdateEmployee(ctx, &proto.EmployeeUpdateRequest{
+		ID: userID,
+		Updates: &proto.EmployeeRequest{
+			Employee: factory.EmployeeFromAPIToProto(employee),
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -114,16 +117,16 @@ func (r *mutationResolver) DeleteEmployee(ctx context.Context, userID string) (*
 	return factory.EmployeeFromProtoToApi(res.Employee), nil
 }
 
-func (r *mutationResolver) AddVacation(ctx context.Context, req model.VacationRequest) (*model.Vacation, error) {
-	vacation, err := r.employeeServiceClient.AddVacation(ctx, &proto.VacationRequest{
-		UserID:        req.UserID,
-		StartDate:     int64(req.StartDate),
-		DurationHours: float32(req.DurationHours),
+func (r *mutationResolver) AddVacation(ctx context.Context, vacation model.VacationRequest) (*model.Vacation, error) {
+	newVacation, err := r.employeeServiceClient.AddVacation(ctx, &proto.VacationRequest{
+		UserID:        vacation.UserID,
+		StartDate:     int64(vacation.StartDate),
+		DurationHours: float32(vacation.DurationHours),
 	})
 	if err != nil {
 		return nil, err
 	}
-	return factory.VacationFromProtoToApi(vacation), nil
+	return factory.VacationFromProtoToApi(newVacation), nil
 }
 
 func (r *queryResolver) Employees(ctx context.Context) ([]*model.Employee, error) {

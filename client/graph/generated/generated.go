@@ -49,7 +49,7 @@ type ComplexityRoot struct {
 		AddEmployees   func(childComplexity int, employees []*model.EmployeeInput) int
 		AddVacation    func(childComplexity int, vacation model.VacationRequest) int
 		DeleteEmployee func(childComplexity int, userID string) int
-		UpdateEmployee func(childComplexity int, employee model.EmployeeInput) int
+		UpdateEmployee func(childComplexity int, userID string, employee model.EmployeeInput) int
 	}
 
 	Query struct {
@@ -96,7 +96,7 @@ type MutationResolver interface {
 	AddEmployee(ctx context.Context, employee model.EmployeeInput) (*model.Employee, error)
 	AddEmployees(ctx context.Context, employees []*model.EmployeeInput) (*model.EmployeeSaveResult, error)
 	AddAttachment(ctx context.Context, userID string, file graphql.Upload) (*model.Document, error)
-	UpdateEmployee(ctx context.Context, employee model.EmployeeInput) (*model.Employee, error)
+	UpdateEmployee(ctx context.Context, userID string, employee model.EmployeeInput) (*model.Employee, error)
 	DeleteEmployee(ctx context.Context, userID string) (*model.Employee, error)
 	AddVacation(ctx context.Context, vacation model.VacationRequest) (*model.Vacation, error)
 }
@@ -191,7 +191,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateEmployee(childComplexity, args["employee"].(model.EmployeeInput)), true
+		return e.complexity.Mutation.UpdateEmployee(childComplexity, args["userID"].(string), args["employee"].(model.EmployeeInput)), true
 
 	case "Query.attachment":
 		if e.complexity.Query.Attachment == nil {
@@ -477,6 +477,7 @@ input employeeInput {
   lastName: String!
   countryCode: String!
   vacationAccrualRate: Float!
+  vacationAccrued: Float!
 }
 
 type employeeSaveResult {
@@ -497,7 +498,7 @@ type Mutation {
   addEmployee (employee: employeeInput!): employee!
 	addEmployees (employees: [employeeInput!]!): employeeSaveResult!
   addAttachment (userID: String!, file: Upload!): document!
-  updateEmployee (employee: employeeInput!): employee!
+  updateEmployee (userID: String!, employee: employeeInput!): employee!
   deleteEmployee (userID: String!): employee!
 
   addVacation (vacation: vacationRequest!): vacation! 
@@ -596,14 +597,22 @@ func (ec *executionContext) field_Mutation_deleteEmployee_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_updateEmployee_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.EmployeeInput
-	if tmp, ok := rawArgs["employee"]; ok {
-		arg0, err = ec.unmarshalNemployeeInput2githubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐEmployeeInput(ctx, tmp)
+	var arg0 string
+	if tmp, ok := rawArgs["userID"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["employee"] = arg0
+	args["userID"] = arg0
+	var arg1 model.EmployeeInput
+	if tmp, ok := rawArgs["employee"]; ok {
+		arg1, err = ec.unmarshalNemployeeInput2githubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐEmployeeInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["employee"] = arg1
 	return args, nil
 }
 
@@ -832,7 +841,7 @@ func (ec *executionContext) _Mutation_updateEmployee(ctx context.Context, field 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateEmployee(rctx, args["employee"].(model.EmployeeInput))
+		return ec.resolvers.Mutation().UpdateEmployee(rctx, args["userID"].(string), args["employee"].(model.EmployeeInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2900,6 +2909,12 @@ func (ec *executionContext) unmarshalInputemployeeInput(ctx context.Context, obj
 		case "vacationAccrualRate":
 			var err error
 			it.VacationAccrualRate, err = ec.unmarshalNFloat2float64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "vacationAccrued":
+			var err error
+			it.VacationAccrued, err = ec.unmarshalNFloat2float64(ctx, v)
 			if err != nil {
 				return it, err
 			}

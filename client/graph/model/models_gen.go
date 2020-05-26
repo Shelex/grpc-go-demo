@@ -28,6 +28,7 @@ type EmployeeInput struct {
 	LastName            string  `json:"lastName"`
 	CountryCode         string  `json:"countryCode"`
 	VacationAccrualRate float64 `json:"vacationAccrualRate"`
+	VacationAccrued     float64 `json:"vacationAccrued"`
 }
 
 type EmployeeSaveResult struct {

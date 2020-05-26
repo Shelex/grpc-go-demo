@@ -40,6 +40,7 @@ input employeeInput {
   lastName: String!
   countryCode: String!
   vacationAccrualRate: Float!
+  vacationAccrued: Float!
 }
 
 type employeeSaveResult {
@@ -60,7 +61,7 @@ type Mutation {
   addEmployee (employee: employeeInput!): employee!
 	addEmployees (employees: [employeeInput!]!): employeeSaveResult!
   addAttachment (userID: String!, file: Upload!): document!
-  updateEmployee (employee: employeeInput!): employee!
+  updateEmployee (userID: String!, employee: employeeInput!): employee!
   deleteEmployee (userID: String!): employee!
 
   addVacation (vacation: vacationRequest!): vacation! 
