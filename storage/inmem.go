@@ -89,7 +89,7 @@ func (i *InMem) GetAll() ([]entities.Employee, error) {
 	return employees, nil
 }
 
-func (i *InMem) AddEmployee(ID string, e entities.Employee) (entities.Employee, error) {
+func (i *InMem) AddEmployee(e entities.Employee) (entities.Employee, error) {
 	var empty entities.Employee
 	for _, employee := range i.employees {
 		if e.BadgeNumber == employee.BadgeNumber {
@@ -97,10 +97,9 @@ func (i *InMem) AddEmployee(ID string, e entities.Employee) (entities.Employee, 
 		}
 	}
 
-	log.Printf("saving user id %s", ID)
-	e.ID = ID
+	log.Printf("saving user id %s", e.ID)
 
-	i.employees[ID] = ID
+	i.employees[e.ID] = e
 	return e, nil
 }
 
