@@ -5,31 +5,31 @@ import (
 )
 
 type Vacation struct {
-	ID            string
-	StartDate     int64
-	DurationHours float32
-	Approved      bool
-	Cancelled     bool
+	ID            string  `json:"id"`
+	StartDate     int64   `json:"startDate"`
+	DurationHours float32 `json:"durationHours"`
+	Approved      bool    `json:"approved"`
+	Cancelled     bool    `json:"cancelled"`
 }
 
 type Employee struct {
-	ID                  string
-	BadgeNumber         int32
-	FirstName           string
-	LastName            string
-	CountryCode         string
-	VacationAccrualRate float32
-	VacationAccrued     float32
-	Vacations           []Vacation
-	Documents           []string
+	ID                  string     `json:"id" bson:"_id"`
+	BadgeNumber         int32      `json:"badgeNumber" bson:"badgeNumber"`
+	FirstName           string     `json:"firstName" bson:"firstName"`
+	LastName            string     `json:"lastName" bson:"lastName"`
+	CountryCode         string     `json:"countryCode" bson:"countryCode"`
+	VacationAccrualRate float32    `json:"vacationAccrualRate" bson:"vacationAccrualRate"`
+	VacationAccrued     float32    `json:"vacationAccrued" bson:"vacationAccrued"`
+	Vacations           []Vacation `json:"vacations"`
+	Documents           []string   `json:"documents"`
 }
 
 type Document struct {
-	ID        string
-	UserID    string
-	FileName  string
+	ID        string `json:"id"`
+	UserID    string `json:"userId"`
+	FileName  string `json:"fileName"`
 	Data      []byte
-	CreatedAt int64 // Unix timestamp
+	CreatedAt int64 `json:"createdAt"` // Unix timestamp
 }
 
 func DocumentFromStorageToProto(d Document) *proto.Attachment {
@@ -69,7 +69,7 @@ func EmployeeFromProtoToStorage(e *proto.Employee) Employee {
 }
 
 func VacationsFromStorageToProto(vacations []Vacation) []*proto.Vacation {
-	protoVacations := make([]*proto.Vacation, len(vacations))
+	protoVacations := make([]*proto.Vacation, 0, len(vacations))
 	for _, v := range vacations {
 		protoVacations = append(protoVacations, VacationFromStorageToProto(v))
 	}

@@ -13,7 +13,7 @@ service EmployeeService {
     rpc AddAttachment (stream AttachmentRequest) returns (Attachment);
     rpc AttachmentByID (ByIDRequest) returns (Attachment);
     rpc DeleteEmployee (ByIDRequest) returns (EmployeeResponse);
-    rpc UpdateEmployee (EmployeeRequest) returns (EmployeeResponse);
+    rpc UpdateEmployee (EmployeeUpdateRequest) returns (EmployeeResponse);
 
     rpc AddVacation(VacationRequest) returns (Vacation);
 }
@@ -61,6 +61,11 @@ message ByIDRequest {
 
 message EmployeeRequest {
     Employee employee = 1;
+}
+
+message EmployeeUpdateRequest {
+    string ID = 1;
+    EmployeeRequest updates = 2;
 }
 
 message EmployeeResponse {

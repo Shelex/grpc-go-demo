@@ -7,18 +7,22 @@ import (
 	"io"
 	"log"
 	"net"
+	"os"
+	"time"
 
 	"github.com/Shelex/grpc-go-demo/domain/entities"
 	"github.com/Shelex/grpc-go-demo/proto"
 	"github.com/Shelex/grpc-go-demo/storage"
 	"github.com/Shelex/grpc-go-demo/storage/documents"
+	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/metadata"
 )
 
 const (
-	port = ":9000"
+	port      = ":9000"
+	MONGO_URL = "localhost:27017"
 )
 
 func main() {
@@ -32,10 +36,25 @@ func main() {
 		log.Fatal(err)
 	}
 
+	var repo storage.Storage
+	var env string
+	var dbErr error
+	env = os.Getenv("ENV")
+	switch env {
+	case "test":
+		repo, dbErr = storage.NewInMemStorage()
+	default:
+		repo, dbErr = storage.NewMongoStorage(MONGO_URL)
+	}
+	if dbErr != nil {
+		log.Fatalf("failed to connect to repository: %s", dbErr)
+	}
+
 	opts := []grpc.ServerOption{grpc.Creds(creds)}
 	s := grpc.NewServer(opts...)
+
 	srv := &employeeService{
-		repository: storage.NewInMemStorage(),
+		repository: repo,
 		documents:  documents.NewLocalFS(),
 	}
 	proto.RegisterEmployeeServiceServer(s, srv)
@@ -77,6 +96,7 @@ func (e *employeeService) EmployeeByID(ctx context.Context, req *proto.ByIDReque
 }
 
 func (e *employeeService) AddEmployee(ctx context.Context, req *proto.EmployeeRequest) (*proto.EmployeeResponse, error) {
+	req.Employee.ID = uuid.New().String()
 	employee, err := e.repository.AddEmployee(entities.EmployeeFromProtoToStorage(req.Employee))
 	if err != nil {
 		return nil, err
@@ -101,6 +121,7 @@ func (e *employeeService) AddEmployees(stream proto.EmployeeService_AddEmployees
 		if err != nil {
 			return err
 		}
+		emp.Employee.ID = uuid.New().String()
 		saved, err := e.repository.AddEmployee(entities.EmployeeFromProtoToStorage(emp.Employee))
 		if err != nil {
 			errorMessage += fmt.Sprintf("\n%s", err.Error())
@@ -178,8 +199,8 @@ func (e *employeeService) DeleteEmployee(ctx context.Context, req *proto.ByIDReq
 	}, nil
 }
 
-func (e *employeeService) UpdateEmployee(ctx context.Context, req *proto.EmployeeRequest) (*proto.EmployeeResponse, error) {
-	employee, err := e.repository.UpdateEmployee(entities.EmployeeFromProtoToStorage(req.Employee))
+func (e *employeeService) UpdateEmployee(ctx context.Context, req *proto.EmployeeUpdateRequest) (*proto.EmployeeResponse, error) {
+	employee, err := e.repository.UpdateEmployee(req.ID, entities.EmployeeFromProtoToStorage(req.Updates.Employee))
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +210,17 @@ func (e *employeeService) UpdateEmployee(ctx context.Context, req *proto.Employe
 }
 
 func (e *employeeService) AddVacation(ctx context.Context, req *proto.VacationRequest) (*proto.Vacation, error) {
-	vacation, err := e.repository.AddVacation(req.UserID, req.StartDate, req.DurationHours)
+	start := time.Unix(req.StartDate, 0)
+	tomorrow := time.Now().Add(24 * time.Hour)
+
+	afterTomorrow := start.After(tomorrow)
+	if !afterTomorrow {
+		return nil, fmt.Errorf("vacation start date should be not less than 24 hours from now")
+	}
+
+	vacationID := uuid.New().String()
+
+	vacation, err := e.repository.AddVacation(vacationID, req.UserID, req.StartDate, req.DurationHours)
 	if err != nil {
 		return nil, err
 	}
