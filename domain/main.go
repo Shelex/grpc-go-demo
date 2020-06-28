@@ -211,10 +211,10 @@ func (e *employeeService) UpdateEmployee(ctx context.Context, req *proto.Employe
 
 func (e *employeeService) AddVacation(ctx context.Context, req *proto.VacationRequest) (*proto.Vacation, error) {
 	start := time.Unix(req.StartDate, 0)
-	tomorrow := time.Now().Add(24 * time.Hour)
+	hours24 := time.Now().Add(24 * time.Hour)
 
-	afterTomorrow := start.After(tomorrow)
-	if !afterTomorrow {
+	after24Hours := start.After(hours24)
+	if !after24Hours {
 		return nil, fmt.Errorf("vacation start date should be not less than 24 hours from now")
 	}
 
@@ -225,4 +225,17 @@ func (e *employeeService) AddVacation(ctx context.Context, req *proto.VacationRe
 		return nil, err
 	}
 	return entities.VacationFromStorageToProto(vacation), nil
+}
+
+func (e *employeeService) Vacations(req *proto.GetAllRequest, stream proto.EmployeeService_VacationsServer) error {
+	vacations, err := e.repository.Vacations()
+	if err != nil {
+		return err
+	}
+	for _, vacation := range vacations {
+		if err := stream.Send(entities.VacationFromStorageToProto(vacation)); err != nil {
+			return err
+		}
+	}
+	return nil
 }

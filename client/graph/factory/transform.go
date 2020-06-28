@@ -21,6 +21,10 @@ func EmployeeFromProtoToApi(e *proto.Employee) *model.Employee {
 	for i := range apiDocs {
 		apiDocs[i] = &e.Documents[i]
 	}
+	vacations := make([]*string, len(e.Vacations))
+	for i := range vacations {
+		vacations[i] = &e.Vacations[i]
+	}
 	return &model.Employee{
 		ID:                  e.ID,
 		BadgeNumber:         int(e.BadgeNumber),
@@ -29,7 +33,7 @@ func EmployeeFromProtoToApi(e *proto.Employee) *model.Employee {
 		CountryCode:         e.CountryCode,
 		VacationAccrualRate: float64(e.VacationAccrualRate),
 		VacationAccrued:     float64(e.VacationAccrued),
-		Vacations:           VacationsFromProtoToApi(e.Vacations),
+		Vacations:           vacations,
 		Documents:           apiDocs,
 	}
 }
@@ -45,6 +49,7 @@ func VacationsFromProtoToApi(vacations []*proto.Vacation) []*model.Vacation {
 func VacationFromProtoToApi(v *proto.Vacation) *model.Vacation {
 	return &model.Vacation{
 		ID:            v.ID,
+		UserID:        v.UserID,
 		DurationHours: float64(v.DurationHours),
 		StartDate:     int(v.StartDate),
 		Cancelled:     v.Cancelled,

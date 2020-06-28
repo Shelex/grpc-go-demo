@@ -9,12 +9,14 @@ import (
 	"github.com/Shelex/grpc-go-demo/domain/entities"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+	"github.com/pkg/errors"
 )
 
 type Repository struct {
 	session   *mgo.Session
 	name      string // db name
 	employees string // employees collection name
+	vacations string
 	err       error
 }
 
@@ -27,6 +29,7 @@ func NewMongoStorage(url string) (Storage, error) {
 		session:   session,
 		name:      "employee-service",
 		employees: "employees",
+		vacations: "vacations",
 		err:       nil,
 	}
 
@@ -157,23 +160,36 @@ func (r *Repository) AddDocument(userID string, ID string) error {
 func (r *Repository) AddVacation(ID string, userID string, startDate int64, durationHours float32) (entities.Vacation, error) {
 	session := r.session.Copy()
 	defer session.Close()
-	var v entities.Vacation
+	vacation := entities.Vacation{
+		ID:            ID,
+		UserID:        userID,
+		StartDate:     startDate,
+		DurationHours: durationHours,
+	}
 	employee, err := r.GetEmployee(userID)
 	if err != nil {
-		return v, err
+		return vacation, err
 	}
-
-	v.ID = ID
-	v.StartDate = startDate
-	v.DurationHours = durationHours
 
 	vacationIndex := "vacations." + strconv.Itoa(len(employee.Vacations))
 	update := make(bson.M)
-	update[vacationIndex] = v
+	update[vacationIndex] = vacation.ID
 
-	if err := session.DB(r.name).C(r.employees).UpdateId(userID, bson.M{"$set": update}); err != nil {
-		return v, err
+	if err := session.DB(r.name).C(r.vacations).Insert(vacation); err != nil {
+		return vacation, errors.Wrap(err, "failed to create vacation")
 	}
 
-	return v, nil
+	if err := session.DB(r.name).C(r.employees).UpdateId(userID, bson.M{"$set": update}); err != nil {
+		return vacation, errors.Wrap(err, "failed to update employee vacations")
+	}
+
+	return vacation, nil
+}
+
+func (r *Repository) Vacations() ([]entities.Vacation, error) {
+	session := r.session.Copy()
+	defer session.Close()
+	var vacations []entities.Vacation
+	err := session.DB(r.name).C(r.vacations).Find(nil).Sort("id").All(&vacations)
+	return vacations, err
 }

@@ -16,10 +16,12 @@ type Storage interface {
 	DeleteEmployee(ID string) (entities.Employee, error)
 	AddDocument(userID string, ID string) error
 	AddVacation(ID string, userID string, startDate int64, durationHours float32) (entities.Vacation, error)
+	Vacations() ([]entities.Vacation, error)
 }
 
 type InMem struct {
 	employees map[string]entities.Employee
+	vacations map[string]entities.Vacation
 }
 
 func NewInMemStorage() (Storage, error) {
@@ -66,6 +68,7 @@ func NewInMemStorage() (Storage, error) {
 				VacationAccrued:     2.5,
 			},
 		},
+		vacations: map[string]entities.Vacation{},
 	}, nil
 }
 
@@ -160,9 +163,18 @@ func (i *InMem) AddVacation(ID string, userID string, startDate int64, durationH
 	}
 
 	v.ID = ID
+	v.UserID = userID
 	v.StartDate = startDate
 	v.DurationHours = durationHours
-	employee.Vacations = append(employee.Vacations, v)
+	employee.Vacations = append(employee.Vacations, v.ID)
 	i.employees[userID] = employee
 	return v, nil
+}
+
+func (i *InMem) Vacations() ([]entities.Vacation, error) {
+	vacations := make([]entities.Vacation, 0, len(i.vacations))
+	for _, v := range i.vacations {
+		vacations = append(vacations, v)
+	}
+	return vacations, nil
 }

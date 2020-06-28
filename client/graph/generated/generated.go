@@ -56,6 +56,7 @@ type ComplexityRoot struct {
 		Attachment func(childComplexity int, id string) int
 		Employee   func(childComplexity int, id string) int
 		Employees  func(childComplexity int) int
+		Vacations  func(childComplexity int) int
 	}
 
 	Document struct {
@@ -89,6 +90,7 @@ type ComplexityRoot struct {
 		DurationHours func(childComplexity int) int
 		ID            func(childComplexity int) int
 		StartDate     func(childComplexity int) int
+		UserID        func(childComplexity int) int
 	}
 }
 
@@ -104,6 +106,7 @@ type QueryResolver interface {
 	Employees(ctx context.Context) ([]*model.Employee, error)
 	Employee(ctx context.Context, id string) (*model.Employee, error)
 	Attachment(ctx context.Context, id string) (*model.Document, error)
+	Vacations(ctx context.Context) ([]*model.Vacation, error)
 }
 
 type executableSchema struct {
@@ -223,6 +226,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Employees(childComplexity), true
+
+	case "Query.vacations":
+		if e.complexity.Query.Vacations == nil {
+			break
+		}
+
+		return e.complexity.Query.Vacations(childComplexity), true
 
 	case "document.createdAt":
 		if e.complexity.Document.CreatedAt == nil {
@@ -371,6 +381,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Vacation.StartDate(childComplexity), true
 
+	case "vacation.userId":
+		if e.complexity.Vacation.UserID == nil {
+			break
+		}
+
+		return e.complexity.Vacation.UserID(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -437,6 +454,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 var sources = []*ast.Source{
 	&ast.Source{Name: "graph/schema.graphql", Input: `type vacation {
   id: String!
+  userId: String!
   startDate: Int!
   durationHours: Float!
   approved: Boolean!
@@ -467,7 +485,7 @@ type employee {
   countryCode: String!
   vacationAccrualRate: Float!
   vacationAccrued: Float!
-  vacations: [vacation]
+  vacations: [String]
   documents: [String]!
 }
 
@@ -491,7 +509,7 @@ type Query {
   employees: [employee!]!
   employee (id: String!): employee
   attachment(id: String!): document
-  
+  vacations: [vacation]!
 }
 
 type Mutation {
@@ -1048,6 +1066,40 @@ func (ec *executionContext) _Query_attachment(ctx context.Context, field graphql
 	res := resTmp.(*model.Document)
 	fc.Result = res
 	return ec.marshalOdocument2ᚖgithubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐDocument(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_vacations(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Vacations(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Vacation)
+	fc.Result = res
+	return ec.marshalNvacation2ᚕᚖgithubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐVacation(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2598,9 +2650,9 @@ func (ec *executionContext) _employee_vacations(ctx context.Context, field graph
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Vacation)
+	res := resTmp.([]*string)
 	fc.Result = res
-	return ec.marshalOvacation2ᚕᚖgithubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐVacation(ctx, field.Selections, res)
+	return ec.marshalOString2ᚕᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _employee_documents(ctx context.Context, field graphql.CollectedField, obj *model.Employee) (ret graphql.Marshaler) {
@@ -2720,6 +2772,40 @@ func (ec *executionContext) _vacation_id(ctx context.Context, field graphql.Coll
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _vacation_userId(ctx context.Context, field graphql.CollectedField, obj *model.Vacation) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "vacation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3067,6 +3153,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_attachment(ctx, field)
+				return res
+			})
+		case "vacations":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_vacations(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			})
 		case "__type":
@@ -3472,6 +3572,11 @@ func (ec *executionContext) _vacation(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = graphql.MarshalString("vacation")
 		case "id":
 			out.Values[i] = ec._vacation_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "userId":
+			out.Values[i] = ec._vacation_userId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3950,6 +4055,43 @@ func (ec *executionContext) marshalNvacation2githubᚗcomᚋShelexᚋgrpcᚑgo�
 	return ec._vacation(ctx, sel, &v)
 }
 
+func (ec *executionContext) marshalNvacation2ᚕᚖgithubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐVacation(ctx context.Context, sel ast.SelectionSet, v []*model.Vacation) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOvacation2ᚖgithubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐVacation(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
 func (ec *executionContext) marshalNvacation2ᚖgithubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐVacation(ctx context.Context, sel ast.SelectionSet, v *model.Vacation) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4016,6 +4158,38 @@ func (ec *executionContext) unmarshalOString2string(ctx context.Context, v inter
 
 func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	return graphql.MarshalString(v)
+}
+
+func (ec *executionContext) unmarshalOString2ᚕᚖstring(ctx context.Context, v interface{}) ([]*string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]*string, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalOString2ᚖstring(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕᚖstring(ctx context.Context, sel ast.SelectionSet, v []*string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalOString2ᚖstring(ctx, sel, v[i])
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
@@ -4239,46 +4413,6 @@ func (ec *executionContext) marshalOemployee2ᚖgithubᚗcomᚋShelexᚋgrpcᚑg
 
 func (ec *executionContext) marshalOvacation2githubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐVacation(ctx context.Context, sel ast.SelectionSet, v model.Vacation) graphql.Marshaler {
 	return ec._vacation(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOvacation2ᚕᚖgithubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐVacation(ctx context.Context, sel ast.SelectionSet, v []*model.Vacation) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOvacation2ᚖgithubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐVacation(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
 }
 
 func (ec *executionContext) marshalOvacation2ᚖgithubᚗcomᚋShelexᚋgrpcᚑgoᚑdemoᚋclientᚋgraphᚋmodelᚐVacation(ctx context.Context, sel ast.SelectionSet, v *model.Vacation) graphql.Marshaler {
