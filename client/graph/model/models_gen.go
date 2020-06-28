@@ -11,15 +11,15 @@ type Document struct {
 }
 
 type Employee struct {
-	ID                  string      `json:"id"`
-	BadgeNumber         int         `json:"badgeNumber"`
-	FirstName           string      `json:"firstName"`
-	LastName            string      `json:"lastName"`
-	CountryCode         string      `json:"countryCode"`
-	VacationAccrualRate float64     `json:"vacationAccrualRate"`
-	VacationAccrued     float64     `json:"vacationAccrued"`
-	Vacations           []*Vacation `json:"vacations"`
-	Documents           []*string   `json:"documents"`
+	ID                  string    `json:"id"`
+	BadgeNumber         int       `json:"badgeNumber"`
+	FirstName           string    `json:"firstName"`
+	LastName            string    `json:"lastName"`
+	CountryCode         string    `json:"countryCode"`
+	VacationAccrualRate float64   `json:"vacationAccrualRate"`
+	VacationAccrued     float64   `json:"vacationAccrued"`
+	Vacations           []*string `json:"vacations"`
+	Documents           []*string `json:"documents"`
 }
 
 type EmployeeInput struct {
@@ -38,6 +38,7 @@ type EmployeeSaveResult struct {
 
 type Vacation struct {
 	ID            string  `json:"id"`
+	UserID        string  `json:"userId"`
 	StartDate     int     `json:"startDate"`
 	DurationHours float64 `json:"durationHours"`
 	Approved      bool    `json:"approved"`

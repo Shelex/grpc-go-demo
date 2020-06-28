@@ -165,6 +165,22 @@ func (r *queryResolver) Attachment(ctx context.Context, id string) (*model.Docum
 	return factory.AttachmentFromProtoToApi(doc), nil
 }
 
+func (r *queryResolver) Vacations(ctx context.Context) ([]*model.Vacation, error) {
+	stream, err := r.employeeServiceClient.Vacations(context.Background(), &proto.GetAllRequest{})
+	if err != nil {
+		return nil, err
+	}
+	vacations := make([]*model.Vacation, 0, 10)
+	for {
+		vacation, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		vacations = append(vacations, factory.VacationFromProtoToApi(vacation))
+	}
+	return vacations, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 

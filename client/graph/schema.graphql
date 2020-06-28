@@ -1,5 +1,6 @@
 type vacation {
   id: String!
+  userId: String!
   startDate: Int!
   durationHours: Float!
   approved: Boolean!
@@ -30,7 +31,7 @@ type employee {
   countryCode: String!
   vacationAccrualRate: Float!
   vacationAccrued: Float!
-  vacations: [vacation]
+  vacations: [String]
   documents: [String]!
 }
 
@@ -54,7 +55,7 @@ type Query {
   employees: [employee!]!
   employee (id: String!): employee
   attachment(id: String!): document
-  
+  vacations: [vacation]!
 }
 
 type Mutation {

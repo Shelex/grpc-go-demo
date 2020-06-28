@@ -16,6 +16,7 @@ service EmployeeService {
     rpc UpdateEmployee (EmployeeUpdateRequest) returns (EmployeeResponse);
 
     rpc AddVacation(VacationRequest) returns (Vacation);
+    rpc Vacations (GetAllRequest) returns (stream Vacation);
 }
 
 message Employee {
@@ -26,16 +27,17 @@ message Employee {
     string countryCode = 5;
     float vacationAccrualRate = 6;
     float vacationAccrued = 7;
-    repeated Vacation vacations = 8;
+    repeated string vacations = 8;
     repeated string documents = 9;
 }
 
 message Vacation {
     string ID = 1;
-    int64 startDate = 2;
-    float durationHours = 3;
-    bool approved = 4;
-    bool cancelled = 5;
+    string userID = 2;
+    int64 startDate = 3;
+    float durationHours = 4;
+    bool approved = 5;
+    bool cancelled = 6;
 }
 
 message VacationRequest {
