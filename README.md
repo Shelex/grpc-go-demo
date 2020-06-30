@@ -39,13 +39,7 @@
     vacationAccrualRate
     vacationAccrued
     documents
-    vacations {
-      id
-      startDate
-      durationHours
-      approved
-      cancelled
-    }
+    vacations
   }
 }
  ```
@@ -62,13 +56,7 @@ query {
     vacationAccrualRate
     vacationAccrued
     documents
-    vacations {
-      id
-      startDate
-      durationHours
-      approved
-      cancelled
-    }
+    vacations
   }
 }
  ```
@@ -107,13 +95,7 @@ query {
     vacationAccrualRate
     vacationAccrued
     documents
-    vacations {
-      id
-      startDate
-      durationHours
-      approved
-      cancelled
-    }
+    vacations
   }
 }
 ```
@@ -149,6 +131,7 @@ query {
       vacationAccrualRate
       vacationAccrued
       documents
+      vacations
     }
     errors
   }
@@ -195,13 +178,7 @@ query {
     countryCode
     vacationAccrualRate
     vacationAccrued
-    vacations {
-      id
-      startDate
-      durationHours
-      approved
-      cancelled
-    }
+    vacations
     documents
   }
 }
@@ -232,8 +209,23 @@ query {
     }
   ) {
     id
+    userId
     startDate
     durationHours
+    approved
+    cancelled
+  }
+}
+```
+
+- query vacations: get list of all vacations
+```graphql
+query {
+  vacations {
+    id
+    userId
+    durationHours
+    startDate
     approved
     cancelled
   }
