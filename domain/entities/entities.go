@@ -21,8 +21,8 @@ type Employee struct {
 	CountryCode         string   `json:"countryCode" bson:"countryCode"`
 	VacationAccrualRate float32  `json:"vacationAccrualRate" bson:"vacationAccrualRate"`
 	VacationAccrued     float32  `json:"vacationAccrued" bson:"vacationAccrued"`
-	Vacations           []string `json:"vacations"`
-	Documents           []string `json:"documents"`
+	Vacations           []string `json:"vacations" bson:"vacations"`
+	Documents           []string `json:"documents" bson:"documents"`
 }
 
 type Document struct {

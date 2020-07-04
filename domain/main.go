@@ -72,7 +72,7 @@ type employeeService struct {
 func (e *employeeService) Employees(req *proto.GetAllRequest, stream proto.EmployeeService_EmployeesServer) error {
 	employees, err := e.repository.GetAll()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get employees: %w", err)
 	}
 	for _, emp := range employees {
 		if err := stream.Send(&proto.EmployeeResponse{Employee: entities.EmployeeFromStorageToProto(emp)}); err != nil {
@@ -99,18 +99,12 @@ func (e *employeeService) AddEmployee(ctx context.Context, req *proto.EmployeeRe
 	req.Employee.ID = uuid.New().String()
 	employee, err := e.repository.AddEmployee(entities.EmployeeFromProtoToStorage(req.Employee))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to save employee: %w", err)
 	}
-	count, _ := e.repository.Count()
-	log.Printf("employee %s successfully saved; now have %d\n", employee.ID, count)
+	log.Printf("employee %s successfully saved;\n", employee.ID)
 	return &proto.EmployeeResponse{Employee: entities.EmployeeFromStorageToProto(employee)}, nil
 }
 func (e *employeeService) AddEmployees(stream proto.EmployeeService_AddEmployeesServer) error {
-	initialCount, err := e.repository.Count()
-	if err != nil {
-		return err
-	}
-	log.Printf("now have %d employees\n", initialCount)
 	var savedCount int
 	var errorMessage string
 	for {
@@ -137,11 +131,7 @@ func (e *employeeService) AddEmployees(stream proto.EmployeeService_AddEmployees
 	if errorMessage != "" {
 		return errors.New(errorMessage)
 	}
-	current, err := e.repository.Count()
-	if err != nil {
-		return err
-	}
-	log.Printf("successfully saved %d employees;\n now have %d\n", savedCount, current)
+	log.Printf("successfully saved %d employees", savedCount)
 	return nil
 }
 
@@ -154,7 +144,7 @@ func (e *employeeService) AddAttachment(stream proto.EmployeeService_AddAttachme
 		fileName = md.Get("filename")[0]
 		emp, err := e.repository.GetEmployee(userID)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to get employeee with id \"%s\":%w", userID, err)
 		}
 		log.Printf("receiving photo for user %s (%s %s)\n", emp.ID, emp.FirstName, emp.LastName)
 	}
@@ -166,15 +156,15 @@ func (e *employeeService) AddAttachment(stream proto.EmployeeService_AddAttachme
 			document, err := e.documents.SaveDocument(userID, fileName, imgData)
 			document.UserID = userID
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to save document: %w", err)
 			}
 			if err := e.repository.AddDocument(userID, document.ID); err != nil {
-				return err
+				return fmt.Errorf("failed to save document for employee \"%s\": %w", userID, err)
 			}
 			return stream.SendAndClose(entities.DocumentFromStorageToProto(document))
 		}
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to read file data from stream: %w", err)
 		}
 		log.Printf("received %d bytes\n", len(data.Data))
 		imgData = append(imgData, data.Data...)
@@ -213,8 +203,7 @@ func (e *employeeService) AddVacation(ctx context.Context, req *proto.VacationRe
 	start := time.Unix(req.StartDate, 0)
 	hours24 := time.Now().Add(24 * time.Hour)
 
-	after24Hours := start.After(hours24)
-	if !after24Hours {
+	if !start.After(hours24) {
 		return nil, fmt.Errorf("vacation start date should be not less than 24 hours from now")
 	}
 
@@ -222,7 +211,7 @@ func (e *employeeService) AddVacation(ctx context.Context, req *proto.VacationRe
 
 	vacation, err := e.repository.AddVacation(vacationID, req.UserID, req.StartDate, req.DurationHours)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to add vacation: %w", err)
 	}
 	return entities.VacationFromStorageToProto(vacation), nil
 }
@@ -230,11 +219,11 @@ func (e *employeeService) AddVacation(ctx context.Context, req *proto.VacationRe
 func (e *employeeService) Vacations(req *proto.GetAllRequest, stream proto.EmployeeService_VacationsServer) error {
 	vacations, err := e.repository.Vacations()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get vacations: %w", err)
 	}
 	for _, vacation := range vacations {
 		if err := stream.Send(entities.VacationFromStorageToProto(vacation)); err != nil {
-			return err
+			return fmt.Errorf("failed to send vacation: %w", err)
 		}
 	}
 	return nil
