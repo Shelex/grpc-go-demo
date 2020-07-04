@@ -18,12 +18,13 @@ func EmployeeFromAPIToProto(e model.EmployeeInput) *proto.Employee {
 
 func EmployeeFromProtoToApi(e *proto.Employee) *model.Employee {
 	apiDocs := make([]*string, len(e.Documents))
-	for i := range apiDocs {
-		apiDocs[i] = &e.Documents[i]
+	for i, docID := range e.Documents {
+		apiDocs[i] = &docID
 	}
+
 	vacations := make([]*string, len(e.Vacations))
-	for i := range vacations {
-		vacations[i] = &e.Vacations[i]
+	for i, vacationID := range e.Vacations {
+		vacations[i] = &vacationID
 	}
 	return &model.Employee{
 		ID:                  e.ID,

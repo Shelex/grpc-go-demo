@@ -87,7 +87,6 @@ func (r *Repository) UpdateEmployee(ID string, e entities.Employee) (entities.Em
 	defer session.Close()
 
 	update := make(bson.M)
-	log.Printf("incoming employee updates: %v", e)
 
 	if e.BadgeNumber != 0 {
 		update["badgeNumber"] = e.BadgeNumber
@@ -108,16 +107,11 @@ func (r *Repository) UpdateEmployee(ID string, e entities.Employee) (entities.Em
 		update["vacationAccrued"] = e.VacationAccrued
 	}
 
-	log.Printf("result of employee updates: %v", update)
-
 	if err := session.DB(r.name).C(r.employees).UpdateId(ID, bson.M{"$set": update}); err != nil {
-		return empty, err
+		return empty, fmt.Errorf("failed to update employee: %w", err)
 	}
 
 	employee, err := r.GetEmployee(ID)
-
-	log.Printf("now employee is: %v", employee)
-
 	if err != nil {
 		return empty, err
 	}
@@ -130,10 +124,10 @@ func (r *Repository) DeleteEmployee(ID string) (entities.Employee, error) {
 	defer session.Close()
 	e, err := r.GetEmployee(ID)
 	if err != nil {
-		return empty, err
+		return empty, fmt.Errorf("failed to get employee: %w", err)
 	}
 	if err := session.DB(r.name).C(r.employees).RemoveId(ID); err != nil {
-		return empty, err
+		return empty, fmt.Errorf("failed to delete employee: %w", err)
 	}
 	return e, nil
 }
