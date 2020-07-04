@@ -187,3 +187,10 @@ func (r *Repository) Vacations() ([]entities.Vacation, error) {
 	err := session.DB(r.name).C(r.vacations).Find(nil).Sort("id").All(&vacations)
 	return vacations, err
 }
+
+func (r *Repository) DeleteVacations(userID string) error {
+	session := r.session.Copy()
+	defer session.Close()
+	_, err := session.DB(r.name).C(r.vacations).RemoveAll(bson.M{"userId": userID})
+	return err
+}

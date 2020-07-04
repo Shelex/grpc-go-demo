@@ -17,6 +17,7 @@ type Storage interface {
 	AddDocument(userID string, ID string) error
 	AddVacation(ID string, userID string, startDate int64, durationHours float32) (entities.Vacation, error)
 	Vacations() ([]entities.Vacation, error)
+	DeleteVacations(userID string) error
 }
 
 type InMem struct {
@@ -177,4 +178,13 @@ func (i *InMem) Vacations() ([]entities.Vacation, error) {
 		vacations = append(vacations, v)
 	}
 	return vacations, nil
+}
+
+func (i *InMem) DeleteVacations(userID string) error {
+	for id, vacation := range i.vacations {
+		if vacation.UserID == userID {
+			delete(i.vacations, id)
+		}
+	}
+	return nil
 }
