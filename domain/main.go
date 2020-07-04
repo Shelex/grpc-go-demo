@@ -184,6 +184,9 @@ func (e *employeeService) DeleteEmployee(ctx context.Context, req *proto.ByIDReq
 	if err != nil {
 		return nil, err
 	}
+	if err := e.repository.DeleteVacations(req.ID); err != nil {
+		return nil, fmt.Errorf("failed to remove vacations: %w", err)
+	}
 	return &proto.EmployeeResponse{
 		Employee: entities.EmployeeFromStorageToProto(employee),
 	}, nil

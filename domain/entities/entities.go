@@ -5,12 +5,12 @@ import (
 )
 
 type Vacation struct {
-	ID            string  `json:"id"`
-	UserID        string  `json:"userId"`
-	StartDate     int64   `json:"startDate"`
-	DurationHours float32 `json:"durationHours"`
-	Approved      bool    `json:"approved"`
-	Cancelled     bool    `json:"cancelled"`
+	ID            string  `json:"id" bson:"id"`
+	UserID        string  `json:"userId" bson:"userId"`
+	StartDate     int64   `json:"startDate" bson:"startDate"`
+	DurationHours float32 `json:"durationHours" bson:"durationHours"`
+	Approved      bool    `json:"approved" bson:"approved"`
+	Cancelled     bool    `json:"cancelled" bson:"cancelled"`
 }
 
 type Employee struct {
