@@ -3,13 +3,13 @@ package storage
 import (
 	"context"
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/Shelex/grpc-go-demo/domain/entities"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 type Repository struct {
