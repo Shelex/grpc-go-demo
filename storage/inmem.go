@@ -2,9 +2,9 @@ package storage
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/Shelex/grpc-go-demo/domain/entities"
+	log "github.com/sirupsen/logrus"
 )
 
 type Storage interface {
