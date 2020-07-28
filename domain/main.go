@@ -7,9 +7,9 @@ import (
 	"io"
 	"log"
 	"net"
-	"os"
 	"time"
 
+	"github.com/Shelex/grpc-go-demo/config"
 	"github.com/Shelex/grpc-go-demo/domain/entities"
 	"github.com/Shelex/grpc-go-demo/proto"
 	"github.com/Shelex/grpc-go-demo/storage"
@@ -20,31 +20,27 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-const (
-	port      = ":9000"
-	MONGO_URL = "localhost:27017"
-)
-
 func main() {
-	lis, err := net.Listen("tcp", port)
+	cfg := config.GetEnv()
+
+	lis, err := net.Listen("tcp", ":"+cfg.DomainServicePort)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	creds, err := credentials.NewServerTLSFromFile("cert.pem", "key.pem")
+	creds, err := credentials.NewServerTLSFromFile(cfg.PathToTLSCertFile, cfg.PathToTLSKeyFile)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	var repo storage.Storage
-	var env string
 	var dbErr error
-	env = os.Getenv("ENV")
-	switch env {
+	log.Printf("connecting to %s env", cfg.Env)
+	switch cfg.Env {
 	case "test":
 		repo, dbErr = storage.NewInMemStorage()
 	default:
-		repo, dbErr = storage.NewMongoStorage(MONGO_URL)
+		repo, dbErr = storage.NewMongoStorage(cfg.MongoURL)
 	}
 	if dbErr != nil {
 		log.Fatalf("failed to connect to repository: %s", dbErr)
@@ -58,7 +54,7 @@ func main() {
 		documents:  documents.NewLocalFS(),
 	}
 	proto.RegisterEmployeeServiceServer(s, srv)
-	log.Printf("starting server on port %s", port)
+	log.Printf("starting server on port %s", cfg.DomainServicePort)
 	if err := s.Serve(lis); err != nil {
 		log.Fatal(err)
 	}

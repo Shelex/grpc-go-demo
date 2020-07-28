@@ -21,7 +21,7 @@ type (
 	}
 )
 
-func ReadOS() Config {
+func GetEnv() Config {
 	viper.AutomaticEnv()
 
 	viper.SetEnvPrefix("APP")
