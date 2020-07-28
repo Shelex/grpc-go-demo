@@ -6,17 +6,18 @@ package graph
 import (
 	"context"
 	"io"
-	"log"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/Shelex/grpc-go-demo/client/graph/factory"
 	"github.com/Shelex/grpc-go-demo/client/graph/generated"
 	"github.com/Shelex/grpc-go-demo/client/graph/model"
 	"github.com/Shelex/grpc-go-demo/proto"
+	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/metadata"
 )
 
 func (r *mutationResolver) AddEmployee(ctx context.Context, employee model.EmployeeInput) (*model.Employee, error) {
+	log.WithField("employee", employee).Info("requesting AddEmployee")
 	newEmployee := factory.EmployeeFromAPIToProto(employee)
 	res, err := r.employeeServiceClient.AddEmployee(context.Background(), &proto.EmployeeRequest{Employee: newEmployee})
 	if err != nil {
@@ -130,6 +131,7 @@ func (r *mutationResolver) AddVacation(ctx context.Context, vacation model.Vacat
 }
 
 func (r *queryResolver) Employees(ctx context.Context) ([]*model.Employee, error) {
+	log.Info("requesting Employees")
 	stream, err := r.employeeServiceClient.Employees(context.Background(), &proto.GetAllRequest{})
 	if err != nil {
 		return nil, err

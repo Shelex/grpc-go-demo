@@ -38,7 +38,7 @@ func NewEmployeeService(cfg config.Config, ctx context.Context) (*employeeServic
 	}
 
 	opts := []grpc.ServerOption{grpc.Creds(creds)}
-	s := ConnectGRPCWithContext(ctx, opts...)
+	s := newGRPCServerWithContext(ctx, opts...)
 
 	srv := &employeeService{
 		repository: repo,
@@ -78,7 +78,7 @@ func Start(ctx context.Context) {
 	}
 }
 
-func ConnectGRPCWithContext(ctx context.Context, opts ...grpc.ServerOption) *grpc.Server {
+func newGRPCServerWithContext(ctx context.Context, opts ...grpc.ServerOption) *grpc.Server {
 	server := grpc.NewServer(opts...)
 	go func() {
 		<-ctx.Done()
